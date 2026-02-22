@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { apiFetch } from "@/lib/apiFetch";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -27,6 +27,22 @@ type Training = {
 };
 
 export default function TrainingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="corefit-bg">
+          <div className="corefit-container pt-24 pb-10">
+            <p className="text-muted-soft">Carregando...</p>
+          </div>
+        </main>
+      }
+    >
+      <TrainingsInner />
+    </Suspense>
+  );
+}
+
+function TrainingsInner() {
   useRequireAuth();
 
   const router = useRouter();
@@ -381,17 +397,20 @@ export default function TrainingsPage() {
     setError(null);
 
     try {
-      await apiFetch(`/trainings/${editingExercise.trainingId}/exercises/${editingExercise.exerciseId}`, {
-        method: "PATCH",
-        body: {
-          name: eeName.trim(),
-          sets: setsNum,
-          reps: eeReps.trim(),
-          technique: eeTechnique.trim() ? eeTechnique.trim() : undefined,
-          order: orderNum,
-          targetWeight: tw,
-        },
-      });
+      await apiFetch(
+        `/trainings/${editingExercise.trainingId}/exercises/${editingExercise.exerciseId}`,
+        {
+          method: "PATCH",
+          body: {
+            name: eeName.trim(),
+            sets: setsNum,
+            reps: eeReps.trim(),
+            technique: eeTechnique.trim() ? eeTechnique.trim() : undefined,
+            order: orderNum,
+            targetWeight: tw,
+          },
+        }
+      );
 
       cancelEditExercise();
       await load();
@@ -415,8 +434,14 @@ export default function TrainingsPage() {
 
     setError(null);
     try {
-      await apiFetch(`/trainings/${t._id}/exercises/${a._id}`, { method: "PATCH", body: { order: b.order } });
-      await apiFetch(`/trainings/${t._id}/exercises/${b._id}`, { method: "PATCH", body: { order: a.order } });
+      await apiFetch(`/trainings/${t._id}/exercises/${a._id}`, {
+        method: "PATCH",
+        body: { order: b.order },
+      });
+      await apiFetch(`/trainings/${t._id}/exercises/${b._id}`, {
+        method: "PATCH",
+        body: { order: a.order },
+      });
       await load();
     } catch (e: any) {
       setError(e?.message ?? "Erro ao reordenar exercício");
@@ -455,13 +480,29 @@ export default function TrainingsPage() {
 
           {/* Ações do topo (mantidas, mas com estilo do tema) */}
           <div className="mt-3 d-flex flex-wrap gap-2 hero-animate hero-delay-2">
-            <button type="button" onClick={() => router.push("/trainings/ai")} className="btn btn-soft d-inline-flex align-items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.push("/trainings/ai")}
+              className="btn btn-soft d-inline-flex align-items-center gap-2"
+            >
               <Sparkles size={16} />
               Criar treino com IA
             </button>
 
-            <button type="button" onClick={() => router.push("/workouts/active")} className="btn btn-soft d-inline-flex align-items-center gap-2">
-              <span style={{ width: 8, height: 8, borderRadius: 999, background: "rgba(34,197,94,0.9)", display: "inline-block" }} />
+            <button
+              type="button"
+              onClick={() => router.push("/workouts/active")}
+              className="btn btn-soft d-inline-flex align-items-center gap-2"
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 999,
+                  background: "rgba(34,197,94,0.9)",
+                  display: "inline-block",
+                }}
+              />
               Ver treino ativo
             </button>
           </div>
@@ -566,11 +607,7 @@ export default function TrainingsPage() {
                           <label className="register-label" style={{ display: "block", fontSize: 13, marginBottom: 6 }}>
                             Nome
                           </label>
-                          <input
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            className="input-dark"
-                          />
+                          <input value={editName} onChange={(e) => setEditName(e.target.value)} className="input-dark" />
                         </div>
 
                         <div>
@@ -637,7 +674,9 @@ export default function TrainingsPage() {
                         {/* EXERCÍCIOS */}
                         <div className="mt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 12 }}>
                           <div className="d-flex align-items-center justify-content-between gap-2">
-                            <div style={{ fontSize: 13, fontWeight: 900 }}>Exercícios ({t.exercises?.length ?? 0})</div>
+                            <div style={{ fontSize: 13, fontWeight: 900 }}>
+                              Exercícios ({t.exercises?.length ?? 0})
+                            </div>
 
                             <button
                               type="button"
@@ -652,7 +691,7 @@ export default function TrainingsPage() {
                             </button>
                           </div>
 
-                          {/* FORM ADD EXERCISE (mantido, só estilo) */}
+                          {/* FORM ADD EXERCISE */}
                           {addingForId === t._id && !newCycle && (
                             <form
                               onSubmit={(e) => submitAddExercise(e, t)}
@@ -757,7 +796,7 @@ export default function TrainingsPage() {
                             </form>
                           )}
 
-                          {/* LISTA EXERCÍCIOS (mantida) */}
+                          {/* LISTA EXERCÍCIOS */}
                           <div className="mt-3">
                             {!t.exercises || t.exercises.length === 0 ? (
                               <div className="text-muted-soft" style={{ fontSize: 13 }}>
@@ -789,22 +828,14 @@ export default function TrainingsPage() {
                                                 <label className="register-label" style={{ display: "block", fontSize: 12, marginBottom: 6 }}>
                                                   Nome
                                                 </label>
-                                                <input
-                                                  value={eeName}
-                                                  onChange={(e) => setEeName(e.target.value)}
-                                                  className="input-dark"
-                                                />
+                                                <input value={eeName} onChange={(e) => setEeName(e.target.value)} className="input-dark" />
                                               </div>
 
                                               <div>
                                                 <label className="register-label" style={{ display: "block", fontSize: 12, marginBottom: 6 }}>
                                                   Séries
                                                 </label>
-                                                <input
-                                                  value={eeSets}
-                                                  onChange={(e) => setEeSets(e.target.value)}
-                                                  className="input-dark"
-                                                />
+                                                <input value={eeSets} onChange={(e) => setEeSets(e.target.value)} className="input-dark" />
                                               </div>
                                             </div>
 
@@ -813,22 +844,14 @@ export default function TrainingsPage() {
                                                 <label className="register-label" style={{ display: "block", fontSize: 12, marginBottom: 6 }}>
                                                   Reps
                                                 </label>
-                                                <input
-                                                  value={eeReps}
-                                                  onChange={(e) => setEeReps(e.target.value)}
-                                                  className="input-dark"
-                                                />
+                                                <input value={eeReps} onChange={(e) => setEeReps(e.target.value)} className="input-dark" />
                                               </div>
 
                                               <div>
                                                 <label className="register-label" style={{ display: "block", fontSize: 12, marginBottom: 6 }}>
                                                   Ordem
                                                 </label>
-                                                <input
-                                                  value={eeOrder}
-                                                  onChange={(e) => setEeOrder(e.target.value)}
-                                                  className="input-dark"
-                                                />
+                                                <input value={eeOrder} onChange={(e) => setEeOrder(e.target.value)} className="input-dark" />
                                               </div>
                                             </div>
 
@@ -836,11 +859,7 @@ export default function TrainingsPage() {
                                               <label className="register-label" style={{ display: "block", fontSize: 12, marginBottom: 6 }}>
                                                 Técnica (opcional)
                                               </label>
-                                              <input
-                                                value={eeTechnique}
-                                                onChange={(e) => setEeTechnique(e.target.value)}
-                                                className="input-dark"
-                                              />
+                                              <input value={eeTechnique} onChange={(e) => setEeTechnique(e.target.value)} className="input-dark" />
                                             </div>
 
                                             <div>
