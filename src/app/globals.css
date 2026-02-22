@@ -1,0 +1,842 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================
+   GLOBAL THEME (Corefit)
+=========================== */
+
+:root {
+  --background: 0 0% 5%;
+  --foreground: 0 0% 95%;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+body {
+  background: #050505;
+  color: #e5e7eb;
+}
+
+/* =========================
+   Corefit BG (igual dashboard)
+========================= */
+.corefit-bg {
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 350px at 25% 0%, rgba(34, 197, 94, 0.16), transparent 55%),
+    radial-gradient(700px 300px at 70% 15%, rgba(34, 197, 94, 0.10), transparent 60%),
+    #050505;
+  color: #e5e7eb;
+}
+
+/* Container padrão */
+.corefit-container {
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* =========================
+   Topbar (estilo app)
+========================= */
+.corefit-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.corefit-topbar-inner {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.corefit-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+}
+
+.corefit-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(34, 197, 94, 0.18);
+  border: 1px solid rgba(34, 197, 94, 0.30);
+  display: grid;
+  place-items: center;
+  color: #22c55e;
+  font-size: 14px;
+}
+
+.corefit-nav {
+  display: flex;
+  gap: 18px;
+  font-size: 13px;
+  color: rgba(229, 231, 235, 0.72);
+}
+
+.corefit-nav a {
+  color: inherit;
+  text-decoration: none;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.corefit-nav a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(229, 231, 235, 0.9);
+}
+
+/* no mobile, some o menu pra não “sair do quadro” */
+@media (max-width: 640px) {
+  .corefit-nav {
+    display: none;
+  }
+}
+
+/* =========================
+   Cards / botões / inputs (estilo app)
+========================= */
+.card-dark {
+  background: rgba(17, 17, 17, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  padding: 1.5rem;
+}
+
+.glow-green {
+  box-shadow: 0 0 0 1px rgba(34,197,94,0.18),
+    0 0 38px rgba(34,197,94,0.10),
+    0 14px 40px rgba(0, 0, 0, 0.45);
+}
+
+.text-muted-soft {
+  color: rgba(229, 231, 235, 0.65);
+}
+
+.btn-green {
+  background: #22c55e;
+  border: none;
+  color: #03150a;
+  font-weight: 900;
+  border-radius: 12px;
+}
+.btn-green:hover {
+  background: #16a34a;
+  color: #03150a;
+}
+
+.btn-soft {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: #e5e7eb;
+  border-radius: 12px;
+  font-weight: 800;
+}
+.btn-soft:hover {
+  background: rgba(255, 255, 255, 0.10);
+  color: #e5e7eb;
+}
+
+.input-dark {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: #e5e7eb;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  outline: none;
+}
+.input-dark:focus {
+  border-color: rgba(34, 197, 94, 0.35);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25), 0 0 24px rgba(34, 197, 94, 0.14);
+}
+
+/* ✅ Shield leve (Bootstrap não interferir dentro do tema) */
+.corefit-bg button { font: inherit; }
+.corefit-bg input { font: inherit; }
+/* ✅ importante pro treino (textarea no form) */
+.corefit-bg textarea { font: inherit; }
+
+/* =========================
+   Hero animation (Corefit)
+========================= */
+.hero-animate {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: heroFadeUp 0.6s ease-out forwards;
+}
+
+.hero-delay-1 { animation-delay: 0.05s; }
+.hero-delay-2 { animation-delay: 0.15s; }
+.hero-delay-3 { animation-delay: 0.25s; }
+.hero-delay-4 { animation-delay: 0.35s; }
+
+@keyframes heroFadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   Register highlights
+========================= */
+.register-title {
+  color: #22c55e;
+}
+
+.register-label {
+  color: rgba(34, 197, 94, 0.85);
+  font-weight: 600;
+}
+
+.register-label small {
+  color: rgba(34, 197, 94, 0.55);
+  font-weight: 500;
+}
+
+/* =========================================================
+   Workout Active UI (print 1)
+========================================================= */
+
+/* (mantive TUDO como você colou) */
+
+.workout-page { position: relative; }
+
+.workout-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 10px 0 14px;
+}
+
+.workout-top-left { flex: 1; min-width: 0; }
+
+.workout-top-label {
+  font-size: 12px;
+  color: rgba(229,231,235,0.55);
+  margin-bottom: 8px;
+}
+
+.workout-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.workout-progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(34,197,94,0.65);
+  box-shadow: 0 0 18px rgba(34,197,94,0.25);
+}
+
+.workout-top-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.workout-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(229,231,235,0.85);
+}
+
+.workout-chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(34,197,94,0.95);
+  box-shadow: 0 0 14px rgba(34,197,94,0.35);
+}
+
+.workout-chip-dot--amber {
+  background: rgba(245,158,11,0.95);
+  box-shadow: 0 0 14px rgba(245,158,11,0.25);
+}
+
+.workout-link {
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: -0.2px;
+  background: transparent;
+  border: 1px solid rgba(34,197,94,0.30);
+  color: rgba(134,239,172,0.95);
+}
+.workout-link:hover { background: rgba(34,197,94,0.10); }
+.workout-link:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.workout-hero { margin-bottom: 14px; }
+
+.workout-hero-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.workout-hero-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* ✅ aqui é onde você tinha o “TREINO” saindo pra fora.
+   Mantive como estava, mas isso já segura.
+   Se quiser “não redondinho”, troca no JSX pra usar uma pill. */
+.workout-hero-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(34,197,94,0.16);
+  border: 1px solid rgba(34,197,94,0.28);
+  color: rgba(134,239,172,0.95);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.workout-hero-name {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  color: rgba(255,255,255,0.96);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workout-hero-sub { margin-top: 2px; font-size: 12px; }
+.workout-save { font-size: 12px; flex-shrink: 0; }
+
+.workout-list { display: flex; flex-direction: column; gap: 10px; }
+
+.workout-ex-card {
+  border-radius: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.workout-ex-card--open {
+  border-color: rgba(34,197,94,0.22);
+  box-shadow: 0 0 0 1px rgba(34,197,94,0.12), 0 12px 34px rgba(0,0,0,0.28);
+}
+
+.workout-ex-head {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 14px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+}
+
+.workout-ex-head:hover { background: rgba(255,255,255,0.03); }
+
+.workout-ex-head-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.workout-ex-index {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(229,231,235,0.85);
+  font-weight: 900;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.workout-ex-meta { min-width: 0; }
+
+.workout-ex-name {
+  font-weight: 900;
+  font-size: 13px;
+  color: rgba(255,255,255,0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workout-ex-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workout-ex-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.workout-ex-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(229,231,235,0.86);
+}
+
+.workout-ex-chevron {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  color: rgba(229,231,235,0.75);
+  transition: transform 0.15s ease;
+}
+.workout-ex-chevron.open { transform: rotate(180deg); }
+
+.workout-ex-body {
+  padding: 12px 14px 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.workout-ex-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: rgba(229,231,235,0.70);
+}
+
+.workout-ex-status-label {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.22);
+  color: rgba(134,239,172,0.95);
+  font-weight: 900;
+}
+
+.workout-ex-status-item b { color: rgba(255,255,255,0.92); }
+
+.workout-grid-head {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr 42px;
+  gap: 10px;
+  font-size: 11px;
+  color: rgba(229,231,235,0.50);
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 10px;
+}
+
+.workout-set-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr 42px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  margin-bottom: 8px;
+}
+
+.workout-set-row--done {
+  border-color: rgba(34,197,94,0.22);
+  background: rgba(34,197,94,0.05);
+}
+
+.workout-set-cell--set { display: flex; align-items: center; }
+
+.workout-set-pill {
+  width: 34px;
+  height: 26px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.workout-stepper {
+  display: grid;
+  grid-template-columns: 34px 1fr 34px;
+  gap: 8px;
+  align-items: center;
+}
+
+.workout-step {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(229,231,235,0.9);
+  font-weight: 900;
+}
+.workout-step:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(34,197,94,0.25);
+}
+.workout-step:active { transform: translateY(1px); }
+
+.workout-input {
+  width: 100%;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(229,231,235,0.92);
+  padding: 0 10px;
+  outline: none;
+}
+.workout-input:focus {
+  border-color: rgba(34, 197, 94, 0.35);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25), 0 0 24px rgba(34, 197, 94, 0.14);
+}
+
+.workout-set-cell--check { display: flex; justify-content: flex-end; }
+
+.workout-check {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  color: rgba(229,231,235,0.6);
+  font-weight: 900;
+}
+.workout-check:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(34,197,94,0.25);
+}
+.workout-check--on {
+  background: rgba(34,197,94,0.18);
+  border-color: rgba(34,197,94,0.35);
+  color: rgba(134,239,172,0.95);
+}
+
+.workout-hint {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.18);
+  color: rgba(134,239,172,0.90);
+  font-size: 12px;
+}
+
+.workout-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+}
+
+.workout-footer .workout-footer-btn {
+  min-width: 220px;
+  height: 44px;
+  border-radius: 14px;
+}
+
+.workout-footer .corefit-container { display: flex; gap: 12px; }
+
+.workout-footer-btn { padding: 10px 14px !important; }
+
+.workout-footer-primary { flex: 1; max-width: 620px; }
+
+@media (max-width: 640px) {
+  .workout-top { flex-direction: column; align-items: stretch; }
+  .workout-top-right { justify-content: space-between; }
+
+  .workout-grid-head,
+  .workout-set-row { grid-template-columns: 64px 1fr 1fr 42px; }
+
+  .workout-footer .workout-footer-btn {
+    min-width: 0;
+    width: 48%;
+  }
+}
+
+/* =========================================================
+   HISTÓRICO (igual print)
+========================================================= */
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.history-titlewrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.history-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(34,197,94,0.16);
+  border: 1px solid rgba(34,197,94,0.28);
+  color: rgba(134,239,172,0.95);
+  font-weight: 900;
+}
+
+.history-title {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  color: rgba(255,255,255,0.96);
+}
+
+.history-subtitle {
+  font-size: 12px;
+  color: rgba(229,231,235,0.62);
+  margin-top: 1px;
+}
+
+.history-filter {
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(229,231,235,0.9);
+}
+.history-filter:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.history-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.history-summary-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 14px 14px;
+}
+
+.history-summary-label {
+  font-size: 11px;
+  color: rgba(229,231,235,0.55);
+  margin-bottom: 6px;
+}
+
+.history-summary-value {
+  font-size: 18px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.95);
+}
+
+.history-section-label {
+  font-size: 12px;
+  color: rgba(229,231,235,0.62);
+  margin-bottom: 10px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+}
+
+.history-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.history-card-title {
+  font-weight: 900;
+  font-size: 14px;
+  color: rgba(255,255,255,0.96);
+}
+
+.history-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(229,231,235,0.75);
+  flex-shrink: 0;
+}
+
+.history-chip--ok {
+  background: rgba(34,197,94,0.12);
+  border-color: rgba(34,197,94,0.22);
+  color: rgba(134,239,172,0.95);
+}
+
+.history-card-meta {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(229,231,235,0.62);
+}
+
+.history-meta-row { display: flex; align-items: center; gap: 8px; }
+.history-meta-dot { opacity: 0.7; }
+
+.history-stats {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.history-stat {
+  background: rgba(0,0,0,0.20);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+}
+
+.history-stat-label {
+  font-size: 11px;
+  color: rgba(229,231,235,0.55);
+  margin-bottom: 6px;
+}
+
+.history-stat-value {
+  font-size: 16px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.95);
+}
+
+.history-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.history-link {
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(134,239,172,0.95);
+  text-decoration: none;
+}
+.history-link:hover { text-decoration: underline; }
+.history-arrow { margin-left: 6px; }
+
+@media (max-width: 720px) {
+  .history-summary { grid-template-columns: 1fr; }
+  .history-stats { grid-template-columns: 1fr; }
+}
+
+/* ===== Auth fixes (Bootstrap shield) ===== */
+.auth-pass-wrap { position: relative; }
+
+.auth-eye {
+  all: unset;                 /* <- mata bootstrap no button */
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(229,231,235,0.7);
+}
+
+.auth-eye:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(34,197,94,0.25);
+  color: rgba(229,231,235,0.85);
+}
+
+.auth-pass-input { padding-right: 44px; }
+

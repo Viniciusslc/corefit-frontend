@@ -1,0 +1,921 @@
+/* corefit-frontend/src/app/dashboard/dashboard.css */
+
+.corefit-bg {
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 350px at 25% 0%, rgba(34,197,94,0.16), transparent 55%),
+    radial-gradient(700px 300px at 70% 15%, rgba(34,197,94,0.10), transparent 60%),
+    #050505;
+  color: #e5e7eb;
+}
+
+/* Container oficial do Corefit */
+.corefit-container {
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.corefit-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  backdrop-filter: blur(12px);
+  background: rgba(0,0,0,0.55);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.card-dark {
+  background: rgba(17, 17, 17, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  padding: 1.5rem;
+}
+
+.card-hero {
+  background: linear-gradient(135deg, rgba(13,46,23,0.90), rgba(0,0,0,0.90));
+  border: 1px solid rgba(34,197,94,0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+/* brilho nos cantos */
+.card-hero::before {
+  content: "";
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 260px;
+  height: 260px;
+  background: rgba(34,197,94,0.10);
+  filter: blur(40px);
+  border-radius: 999px;
+}
+
+.card-hero::after {
+  content: "";
+  position: absolute;
+  bottom: -70px;
+  left: -70px;
+  width: 220px;
+  height: 220px;
+  background: rgba(34,197,94,0.10);
+  filter: blur(40px);
+  border-radius: 999px;
+}
+
+/* ===== Layout do dashboard (VOLTA lado a lado no desktop) ===== */
+.dashboard-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* mobile */
+  gap: 16px;
+}
+
+/* desktop => 2 colunas */
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ===== “Headerzinho” premium pros blocos (sutil) ===== */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.section-head-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.22);
+  color: #22c55e;
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: rgba(229,231,235,0.95);
+}
+
+/* ===== Último Treino ===== */
+.last-workout-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #22c55e;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.workout-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.workout-date {
+  font-size: 0.875rem;
+  color: rgba(229,231,235,0.5);
+  margin-bottom: 1rem;
+}
+
+.stats-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+}
+
+.highlight-section {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 1rem;
+}
+
+/* ATENÇÃO:
+   goal-info agora NÃO é mais usado no layout final do highlight
+   (mantive aqui pra não quebrar outros lugares que usem)
+*/
+.goal-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* ===== Utilitárias ===== */
+.text-muted-soft { color: rgba(229,231,235,0.65); }
+
+.badge-today {
+  background: rgba(34,197,94,0.18) !important;
+  color: #22c55e !important;
+  border: 1px solid rgba(34,197,94,0.35);
+}
+
+.btn-green {
+  background: #22c55e;
+  border: none;
+  color: #03150a;
+  font-weight: 800;
+  border-radius: 12px;
+}
+.btn-green:hover { background: #16a34a; color: #03150a; }
+
+.btn-soft {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #e5e7eb;
+  border-radius: 12px;
+}
+.btn-soft:hover { background: rgba(255,255,255,0.10); color: #e5e7eb; }
+
+.kpi-icon {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.22);
+  color: #22c55e;
+}
+
+.list-row {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+}
+.list-row:hover { background: rgba(255,255,255,0.06); }
+
+.glow {
+  box-shadow: 0 0 0 1px rgba(34,197,94,0.20), 0 0 30px rgba(34,197,94,0.16);
+}
+
+/* ===== Destaques do Último Treino ===== */
+.last-row {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 0.75rem;
+}
+.last-row:hover { background: rgba(255,255,255,0.05); }
+
+.last-row-good {
+  background: rgba(34,197,94,0.06);
+  border-color: rgba(34,197,94,0.18);
+}
+
+.last-row-warn {
+  background: rgba(245,158,11,0.06);
+  border-color: rgba(245,158,11,0.18);
+}
+
+.last-badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.06);
+  color: rgba(229,231,235,0.85);
+}
+
+.last-badge-good {
+  background: rgba(34,197,94,0.16);
+  border-color: rgba(34,197,94,0.28);
+  color: #86efac;
+}
+
+.last-badge-warn {
+  background: rgba(245,158,11,0.14);
+  border-color: rgba(245,158,11,0.26);
+  color: #fcd34d;
+}
+
+/* ===== LastWorkout row layout igual ao print 2 ===== */
+.last-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.last-row-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0; /* permite truncar */
+}
+
+.last-row-title b {
+  font-weight: 800;
+  color: rgba(229,231,235,0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.last-row-sub {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 14px; /* meta/feito bem próximos */
+  font-size: 0.85rem;
+  color: rgba(229,231,235,0.65);
+}
+
+.last-row-sub b {
+  color: rgba(229,231,235,0.92);
+  font-weight: 800;
+}
+
+/* Shield leve (Bootstrap não interferir dentro do dashboard) */
+.corefit-bg button { font: inherit; }
+.corefit-bg hr { border-color: rgba(255,255,255,0.10); opacity: 1; }
+
+
+/* =========================
+   Quick Actions (Ações rápidas)
+========================= */
+.qa-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.qa-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: rgba(229, 231, 235, 0.95);
+}
+
+.qa-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .qa-grid {
+    grid-template-columns: 1fr 1fr; /* 2x2 no desktop/tablet */
+  }
+}
+
+.qa-tile {
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 14px 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.qa-tile:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.qa-tile:active {
+  transform: translateY(0);
+}
+
+.qa-tile-primary {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.qa-tile-primary:hover {
+  background: rgba(34, 197, 94, 0.22);
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+.qa-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34, 197, 94, 0.10);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  color: rgba(34, 197, 94, 0.95);
+  flex-shrink: 0;
+}
+
+.qa-tile-primary .qa-icon {
+  background: rgba(0, 0, 0, 0.18);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.qa-text {
+  min-width: 0;
+}
+
+.qa-label {
+  font-weight: 800;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 16px;
+}
+
+.qa-sub {
+  font-size: 12px;
+  color: rgba(229, 231, 235, 0.55);
+  margin-top: 2px;
+}
+
+/* =========================
+   Saudação (Olá, Nome 👋)
+========================= */
+.dash-hello {
+  margin-top: 6px;
+}
+
+.dash-hello-title {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+  color: rgba(229,231,235,0.95);
+}
+
+.dash-hello-name {
+  color: #22c55e;
+}
+
+.dash-hello-sub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: rgba(229,231,235,0.55);
+}
+
+/* =========================
+   Hero (igual ao print)
+========================= */
+.hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(34,197,94,0.16);
+  border: 1px solid rgba(34,197,94,0.28);
+  color: rgba(134,239,172,0.95);
+}
+
+.hero-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.96);
+  margin-bottom: 8px;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: rgba(229,231,235,0.70);
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.hero-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-cta {
+  margin-top: 6px;
+}
+
+/* =========================
+   Ações rápidas (grid 2x2)
+========================= */
+.quick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.quick-title {
+  font-size: 14px;
+  font-weight: 900;
+  color: rgba(229,231,235,0.92);
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .quick-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.quick-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all .15s ease;
+  cursor: pointer;
+}
+
+.quick-card:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.quick-card-primary {
+  background: rgba(34,197,94,0.14);
+  border-color: rgba(34,197,94,0.22);
+}
+
+.quick-card-primary:hover {
+  background: rgba(34,197,94,0.18);
+  border-color: rgba(34,197,94,0.30);
+}
+
+.quick-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(229,231,235,0.85);
+  flex-shrink: 0;
+}
+
+.quick-card-primary .quick-icon {
+  background: rgba(34,197,94,0.16);
+  border-color: rgba(34,197,94,0.28);
+  color: rgba(34,197,94,0.95);
+}
+
+.quick-text b {
+  display: block;
+  font-weight: 900;
+  font-size: 13px;
+  color: rgba(255,255,255,0.95);
+}
+
+.quick-text span {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(229,231,235,0.60);
+}
+
+/* ===== QuickActions (Ações rápidas) ===== */
+
+.quick-card {
+  text-align: left;
+  width: 100%;
+  border-radius: 16px;
+  padding: 14px 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: rgba(229,231,235,0.92);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.quick-card:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.quick-card:active {
+  transform: translateY(1px);
+}
+
+.quick-card-primary {
+  background: rgba(34,197,94,0.14);
+  border-color: rgba(34,197,94,0.26);
+}
+
+.quick-card-primary:hover {
+  background: rgba(34,197,94,0.18);
+  border-color: rgba(34,197,94,0.30);
+}
+
+.quick-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.quick-ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34,197,94,0.10);
+  border: 1px solid rgba(34,197,94,0.22);
+  color: rgba(34,197,94,0.95);
+}
+
+.quick-ic-dark {
+  background: rgba(0,0,0,0.12);
+  border-color: rgba(0,0,0,0.20);
+  color: rgba(3,21,10,0.95);
+}
+
+.quick-title {
+  font-weight: 900;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.quick-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(229,231,235,0.55);
+}
+
+/* ===== Ações rápidas (QuickActions) ===== */
+.quick-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .quick-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.quick-tile {
+  width: 100%;
+  text-align: left;
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: rgba(229,231,235,0.92);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  transition: all .15s ease;
+}
+
+.quick-tile:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.quick-tile-primary {
+  background: rgba(34,197,94,0.18);
+  border-color: rgba(34,197,94,0.25);
+}
+
+.quick-tile-primary:hover {
+  background: rgba(34,197,94,0.22);
+  border-color: rgba(34,197,94,0.30);
+}
+
+.quick-ic {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.quick-txt b {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.quick-txt span {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(229,231,235,0.60);
+}
+
+/* =========================
+   Quick Actions (Ações rápidas)
+========================= */
+
+.qa-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .qa-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.qa-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+
+  padding: 14px 14px;
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+
+  transition: all .15s ease;
+  color: rgba(229,231,235,0.92);
+}
+
+.qa-tile:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.qa-tile--primary {
+  background: rgba(34,197,94,0.18);
+  border-color: rgba(34,197,94,0.28);
+}
+
+.qa-tile--primary:hover {
+  background: rgba(34,197,94,0.22);
+  border-color: rgba(34,197,94,0.34);
+}
+
+.qa-ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(34,197,94,0.10);
+  border: 1px solid rgba(34,197,94,0.22);
+  color: rgba(34,197,94,0.95);
+  flex-shrink: 0;
+}
+
+.qa-tile--primary .qa-ic {
+  background: rgba(0,0,0,0.12);
+  border-color: rgba(0,0,0,0.18);
+  color: #03150a;
+}
+
+.qa-tx b {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 16px;
+}
+
+.qa-tx span {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 14px;
+  color: rgba(229,231,235,0.60);
+}
+
+/* ===== Ações rápidas — fundo mais dark ===== */
+.quick-action-btn {
+  background: rgba(10, 10, 10, 0.95); /* preto elegante */
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.quick-action-btn:hover {
+  background: rgba(18, 18, 18, 0.95);
+  border-color: rgba(34,197,94,0.30);
+}
+
+/* ===== Ajustes finais para ficar igual print 2 ===== */
+
+/* Badge HOJE do HeroWorkout */
+.badge-today {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(34,197,94,0.16);
+  border: 1px solid rgba(34,197,94,0.28);
+  color: rgba(134,239,172,0.95);
+}
+
+/* Colunas (apenas pra semântica; já existe right-col) */
+.left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ===== KPI (Ritmo semanal) premium ===== */
+.kpi-week .kpi-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.kpi-week .kpi-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(34,197,94,0.95);
+  box-shadow: 0 0 18px rgba(34,197,94,0.25);
+}
+
+.kpi-week .kpi-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  color: rgba(134,239,172,0.95);
+}
+
+.kpi-week .kpi-status-ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.22);
+  color: rgba(34,197,94,0.95);
+}
+
+/* ===== KPI cards: mesma altura visual ===== */
+.kpi-card{
+  min-height: 176px; /* ajusta pra bater com os 3 cards */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* ===== Ritmo semanal: ícone + barra ===== */
+.kpi-week .kpi-bar-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kpi-week .kpi-bar-ic{
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.22);
+  color: rgba(34,197,94,0.95);
+  flex-shrink: 0;
+}
+
+.kpi-week .kpi-bar{
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.kpi-week .kpi-bar-fill{
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(34,197,94,0.95);
+  box-shadow: 0 0 18px rgba(34,197,94,0.25);
+}
+
+/* =========================
+   KPIs - manter os 3 cards alinhados
+========================= */
+.kpi-card {
+  height: 170px;              /* pode ajustar depois (160-190) */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.kpi-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kpi-bottom {
+  margin-top: auto;
+}
