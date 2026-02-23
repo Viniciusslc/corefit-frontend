@@ -495,7 +495,7 @@ export default function ActiveWorkoutPage() {
                           </div>
 
                           {/* REPS */}
-                          <div className="workout-stepper">
+                          <div className="workout-stepper workout-stepper--reps">
                             <button type="button" className="workout-step" onClick={() => bump(order, i, "reps", -1)} aria-label="diminuir reps">
                               –
                             </button>
@@ -516,7 +516,7 @@ export default function ActiveWorkoutPage() {
                           </div>
 
                           {/* WEIGHT */}
-                          <div className="workout-stepper">
+                          <div className="workout-stepper workout-stepper--weight">
                             <button type="button" className="workout-step" onClick={() => bump(order, i, "weight", -0.5)} aria-label="diminuir peso">
                               –
                             </button>

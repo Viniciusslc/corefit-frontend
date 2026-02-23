@@ -840,3 +840,101 @@ body {
 
 .auth-pass-input { padding-right: 44px; }
 
+
+/* =========================================
+   MOBILE FIX REAL - WORKOUT SETS
+========================================= */
+@media (max-width: 520px) {
+
+  .workout-grid-head {
+    display: none !important;
+  }
+
+  .workout-set-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+
+  .workout-set-cell--set {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .workout-set-pill {
+    font-size: 14px !important;
+  }
+
+  .workout-stepper {
+    width: 100% !important;
+    display: flex !important;
+    gap: 10px !important;
+  }
+
+  .workout-step {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    font-size: 18px !important;
+  }
+
+  .workout-input {
+    flex: 1 !important;
+    min-height: 48px !important;
+    font-size: 16px !important;
+    text-align: center !important;
+  }
+
+  .workout-set-cell--check {
+    align-self: flex-end !important;
+  }
+
+  .workout-check {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    font-size: 18px !important;
+  }
+
+  @media (max-width: 520px) {
+  /* rótulos acima dos steppers */
+  .workout-stepper--reps::before,
+  .workout-stepper--weight::before {
+    display: block;
+    font-size: 12px;
+    opacity: 0.75;
+    margin-bottom: 6px;
+  }
+
+  .workout-stepper--reps::before {
+    content: "Reps";
+  }
+
+  .workout-stepper--weight::before {
+    content: "Peso (kg)";
+  }
+
+  /* deixa o check menos “solto” e mais alinhado */
+  .workout-set-cell--check {
+    width: 100%;
+    display: flex !important;
+    justify-content: flex-end !important;
+    margin-top: 6px;
+  }
+
+  .workout-check {
+    border-radius: 14px !important;
+  }
+}
+
+.workout-set-pill {
+  margin-bottom: 6px;
+}
+
+.workout-check--on {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border-color: #22c55e;
+}
+
+}
