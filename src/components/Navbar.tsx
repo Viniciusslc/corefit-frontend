@@ -6,9 +6,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Dumbbell, LogOut } from "lucide-react";
 
 const publicNav = [
-  { label: "Funcionalidades", href: "/#funcionalidades" },
-  { label: "Planos", href: "/#planos" },
-  { label: "Sobre", href: "/#sobre" },
+  { label: "Funcionalidades", href: "/funcionalidades" },
+  { label: "Planos", href: "/planos" },
+  { label: "Sobre", href: "/sobre" },
 ];
 
 const privateNav = [
