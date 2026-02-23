@@ -39,11 +39,7 @@ export function QuickActions() {
         </button>
 
         {/* Editar treino */}
-        <button
-          type="button"
-          className="qa-tile"
-          onClick={() => router.push("/trainings")}
-        >
+        <button type="button" className="qa-tile" onClick={() => router.push("/trainings")}>
           <div className="qa-ic">
             <PencilLine size={16} />
           </div>
@@ -53,27 +49,19 @@ export function QuickActions() {
           </div>
         </button>
 
-        {/* IA Coach */}
-        <button
-          type="button"
-          className="qa-tile"
-          onClick={() => router.push("/ai/generate-training")}
-        >
+        {/* IA Coach (Em construção) */}
+        <button type="button" className="qa-tile" onClick={() => router.push("/ai-coach")}>
           <div className="qa-ic">
             <Sparkles size={16} />
           </div>
           <div className="qa-tx">
             <b>IA Coach</b>
-            <span>Sugestões inteligentes</span>
+            <span>Em construção</span>
           </div>
         </button>
 
         {/* Progresso */}
-        <button
-          type="button"
-          className="qa-tile"
-          onClick={() => router.push("/workouts")}
-        >
+        <button type="button" className="qa-tile" onClick={() => router.push("/workouts")}>
           <div className="qa-ic">
             <TrendingUp size={16} />
           </div>
