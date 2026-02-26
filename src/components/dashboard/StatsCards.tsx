@@ -24,7 +24,20 @@ function isSameDay(a: Date, b: Date) {
   );
 }
 
-const MONTHS_PT = ["jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
+const MONTHS_PT = [
+  "jan.",
+  "fev.",
+  "mar.",
+  "abr.",
+  "mai.",
+  "jun.",
+  "jul.",
+  "ago.",
+  "set.",
+  "out.",
+  "nov.",
+  "dez.",
+];
 
 function monthLabelPTBR(d = new Date()) {
   return MONTHS_PT[d.getMonth()];
@@ -37,6 +50,33 @@ function prevMonthLabelPTBR(d = new Date()) {
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
+}
+
+/** CountUp simples (sem lib) - SEM quebrar ordem de hooks */
+function useCountUp(target: number, durationMs = 700) {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    const to = Number.isFinite(target) ? target : 0;
+    const from = 0;
+    const start = performance.now();
+    let raf = 0;
+
+    function tick(now: number) {
+      const t = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      const current = from + (to - from) * eased;
+
+      setValue(current);
+
+      if (t < 1) raf = requestAnimationFrame(tick);
+    }
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, durationMs]);
+
+  return value;
 }
 
 type ViewModel = {
@@ -98,8 +138,8 @@ export function StatsCards({ refreshKey }: Props) {
       const workouts: Workout[] = Array.isArray(workoutsRaw)
         ? workoutsRaw
         : Array.isArray(workoutsRaw?.items)
-          ? workoutsRaw.items
-          : [];
+        ? workoutsRaw.items
+        : [];
 
       const finishedDates = workouts
         .map((w) => (w?.finishedAt ? new Date(w.finishedAt) : null))
@@ -179,6 +219,17 @@ export function StatsCards({ refreshKey }: Props) {
 
   const dayLabels = useMemo(() => ["S", "T", "Q", "Q", "S", "S", "D"], []);
 
+  // ✅ Targets seguros (mesmo quando loading/vm null)
+  const weekScoreTarget = vm?.weekScorePct ?? 0;
+  const weekDoneTarget = vm?.weekActiveDays ?? 0;
+  const monthTarget = vm?.workoutsFinishedInMonth ?? 0;
+
+  // ✅ Hooks sempre chamados (ordem fixa)
+  const pctAnim = useCountUp(weekScoreTarget, 750);
+  const weekDoneAnim = useCountUp(weekDoneTarget, 750);
+  const monthAnim = useCountUp(monthTarget, 800);
+
+  // Se estiver carregando ou sem vm, mostramos skeleton, mas hooks já rodaram.
   if (loading || !vm) {
     return (
       <div className="row g-4">
@@ -189,15 +240,13 @@ export function StatsCards({ refreshKey }: Props) {
     );
   }
 
-  // Barra proporcional à meta
+  // barra proporcional à meta
   const progressPct = clamp((vm.weekActiveDays / vm.weekGoalDays) * 100, 0, 100);
 
-  // ✅ delta seguro (nunca undefined)
+  // delta seguro
   const safePrevLabel = vm.prevMonthLabel?.trim() ? vm.prevMonthLabel : "mês anterior";
   const safeDelta = Number.isFinite(vm.deltaVsPrev) ? vm.deltaVsPrev : 0;
-
-  const deltaText =
-    safeDelta === 0 ? "0" : safeDelta > 0 ? `+${safeDelta}` : `${safeDelta}`;
+  const deltaText = safeDelta === 0 ? "0" : safeDelta > 0 ? `+${safeDelta}` : `${safeDelta}`;
 
   return (
     <div className="row g-4">
@@ -209,7 +258,7 @@ export function StatsCards({ refreshKey }: Props) {
           </span>
 
           <div className="text-white text-3xl font-extrabold leading-none">
-            {vm.weekScorePct}%
+            {Math.round(pctAnim)}%
           </div>
 
           <div className="text-white/60 text-[11px] tracking-wide uppercase mt-2">
@@ -228,6 +277,8 @@ export function StatsCards({ refreshKey }: Props) {
                       borderRadius: 6,
                       border: "1px solid rgba(255,255,255,0.10)",
                       background: on ? "rgba(34,197,94,0.35)" : "rgba(255,255,255,0.05)",
+                      boxShadow: on ? "0 0 14px rgba(34,197,94,0.14)" : undefined,
+                      transition: "all .18s ease",
                     }}
                     title={d}
                   />
@@ -251,7 +302,7 @@ export function StatsCards({ refreshKey }: Props) {
           </span>
 
           <div className="text-white text-3xl font-extrabold leading-none">
-            {vm.weekActiveDays}/{vm.weekGoalDays}
+            {Math.round(weekDoneAnim)}/{vm.weekGoalDays}
           </div>
 
           <div className="text-white/60 text-[11px] tracking-wide uppercase mt-2">
@@ -295,7 +346,7 @@ export function StatsCards({ refreshKey }: Props) {
                   borderRadius: 999,
                   background: "rgba(34,197,94,0.85)",
                   boxShadow: "0 0 18px rgba(34,197,94,0.35)",
-                  transition: "width .25s ease",
+                  transition: "width .35s ease",
                 }}
               />
             </div>
@@ -307,7 +358,7 @@ export function StatsCards({ refreshKey }: Props) {
         </div>
       </div>
 
-      {/* 3) TREINOS NO MÊS (✅ alinhado + ✅ delta sem undefined) */}
+      {/* 3) TREINOS NO MÊS */}
       <div className="col-12 col-md-4">
         <div className="card-dark p-4">
           <span className="kpi-icon mb-3">
@@ -315,7 +366,7 @@ export function StatsCards({ refreshKey }: Props) {
           </span>
 
           <div className="text-white text-3xl font-extrabold leading-none">
-            {vm.workoutsFinishedInMonth}
+            {Math.round(monthAnim)}
           </div>
 
           <div className="text-white/60 text-[11px] tracking-wide uppercase mt-2">
@@ -324,10 +375,8 @@ export function StatsCards({ refreshKey }: Props) {
 
           <div className="text-white/40 text-xs mt-1">em {vm.monthLabel}</div>
 
-          {/* ✅ “linha fantasma” pra ficar com a MESMA ALTURA do card 2 */}
           <div className="mt-3" style={{ height: 26 }} />
 
-          {/* ✅ delta */}
           <div className="mt-1" style={{ fontSize: 13, fontWeight: 800 }}>
             <span style={{ color: safeDelta >= 0 ? "#f59e0b" : "rgba(229,231,235,0.65)" }}>
               {deltaText}

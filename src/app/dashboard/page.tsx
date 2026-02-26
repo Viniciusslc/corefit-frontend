@@ -10,7 +10,8 @@ import { HeroWorkout } from "@/components/dashboard/HeroWorkout";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { LastWorkout } from "@/components/dashboard/LastWorkout";
 import { WorkoutsList } from "@/components/dashboard/WorkoutsList";
-import { QuickActions } from "@/components/dashboard/QuickActions"; // ✅ novo
+import { QuickActions } from "@/components/dashboard/QuickActions";
+import { ProgressSection } from "@/components/dashboard/ProgressSection";
 
 type Training = {
   id?: string;
@@ -108,7 +109,7 @@ export default function DashboardPage() {
           <div className="card-dark p-4">Carregando dashboard…</div>
         ) : (
           <div className="dashboard-stack">
-            {/* HERO (print 2) */}
+            {/* HERO */}
             <HeroWorkout
               trainingId={heroData.trainingId}
               workoutName={heroData.workoutName}
@@ -121,21 +122,23 @@ export default function DashboardPage() {
               }}
             />
 
-            {/* KPIs (print 2) */}
+            {/* KPIs */}
             <StatsCards refreshKey={refreshKey} />
+
+            {/* ✅ NOVO: Evolução (Sprint 1) */}
+            <ProgressSection refreshKey={refreshKey} />
 
             {/* GRID (esquerda: listagem / direita: ultimo treino) */}
             <div className="dashboard-grid">
               <div className="left-col">
                 <WorkoutsList />
 
-                {/* ✅ NOVO: Ações rápidas */}
+                {/* Ações rápidas */}
                 <QuickActions />
               </div>
 
               <div className="right-col">
                 <LastWorkout />
-                {/* ❌ removido: NewCycleCard */}
               </div>
             </div>
           </div>

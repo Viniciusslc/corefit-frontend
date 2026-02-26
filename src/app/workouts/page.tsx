@@ -15,13 +15,14 @@ type WorkoutApiItem = {
 
   status?: "active" | "finished";
 
-  startedAt?: string;
-  finishedAt?: string;
-  endedAt?: string;
+  startedAt?: string;   // ISO
+  finishedAt?: string;  // ISO (se existir)
+  endedAt?: string;     // ISO (alguns backends usam endedAt)
 
   performedExercises?: {
-    exerciseName?: string;
+    exerciseName: string;
     order: number;
+    targetWeight?: number;
     setsPerformed: { reps: number; weight: number }[];
   }[];
 };
@@ -35,8 +36,10 @@ type HistoryItem = {
   repsTotal: number | null;
   volumeTotal: number | null;
   executed: boolean;
-  sortTs: number;
+  sortTime: number; // ✅ novo (pra ordenar/filtrar sem gambiarra)
 };
+
+type RangeFilter = "7d" | "30d" | "all";
 
 function pickId(w: WorkoutApiItem) {
   return String(w.id ?? w._id ?? "");
@@ -54,18 +57,13 @@ function formatDateTimeBR(iso?: string) {
   return d.toLocaleString("pt-BR");
 }
 
-function formatDuration(start?: string, end?: string) {
+function formatMinutesFromDates(start?: string, end?: string) {
   if (!start || !end) return "Duração: —";
   const a = new Date(start).getTime();
   const b = new Date(end).getTime();
   if (!Number.isFinite(a) || !Number.isFinite(b) || b <= a) return "Duração: —";
-
   const mins = Math.round((b - a) / 60000);
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-
-  if (h <= 0) return `Duração: ${m} min`;
-  return `Duração: ${h}h ${m}min`;
+  return `Duração: ${mins} min`;
 }
 
 function computeStats(performed?: WorkoutApiItem["performedExercises"]) {
@@ -79,7 +77,6 @@ function computeStats(performed?: WorkoutApiItem["performedExercises"]) {
     for (const s of arr) {
       const r = safeNumber(s.reps);
       const w = safeNumber(s.weight);
-      // conta como executada se tiver reps>0 OU weight>0
       if (r > 0 || w > 0) {
         sets += 1;
         reps += r;
@@ -98,13 +95,33 @@ function computeStats(performed?: WorkoutApiItem["performedExercises"]) {
   };
 }
 
-function getSortTs(w: WorkoutApiItem) {
-  const end = w.finishedAt ?? w.endedAt ?? undefined;
-  const ts = new Date(end ?? w.startedAt ?? 0).getTime();
-  return Number.isFinite(ts) ? ts : 0;
+function startOfDayMs(d: Date) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x.getTime();
 }
 
-export default function WorkoutsPage() {
+function isSameDay(aMs: number, bMs: number) {
+  return startOfDayMs(new Date(aMs)) === startOfDayMs(new Date(bMs));
+}
+
+function isInLastDays(dateMs: number, days: number) {
+  const now = Date.now();
+  const cutoff = now - days * 24 * 60 * 60 * 1000;
+  return dateMs >= cutoff;
+}
+
+function isInThisWeek(dateMs: number) {
+  const now = new Date();
+  const day = now.getDay(); // 0 dom ... 6 sab
+  const diffToMonday = (day + 6) % 7; // seg = 0
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - diffToMonday);
+  monday.setHours(0, 0, 0, 0);
+  return dateMs >= monday.getTime();
+}
+
+export default function WorkoutsHistoryPage() {
   useRequireAuth();
 
   const HISTORY_ENDPOINT = "/workouts";
@@ -113,19 +130,25 @@ export default function WorkoutsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ novo: filtro real
+  const [range, setRange] = useState<RangeFilter>("all");
+
   useEffect(() => {
     async function load() {
       setLoading(true);
       setError(null);
+
       try {
         const data = await apiFetch<WorkoutApiItem[] | { items: WorkoutApiItem[] }>(
           HISTORY_ENDPOINT
         );
+
         const list = Array.isArray(data)
           ? data
           : Array.isArray((data as any)?.items)
           ? (data as any).items
           : [];
+
         setRaw(list);
       } catch (e: any) {
         setError(e?.message ?? "Erro ao carregar histórico");
@@ -138,19 +161,20 @@ export default function WorkoutsPage() {
     load();
   }, []);
 
-  const items: HistoryItem[] = useMemo(() => {
-    const normalized = (raw ?? [])
-      // se o backend manda também "active", filtra aqui:
-      .filter((w) => (w.status ?? "finished") === "finished")
+  const itemsAll: HistoryItem[] = useMemo(() => {
+    return (raw ?? [])
+      // ✅ não deixa treino ativo aparecer no histórico
+      .filter((w) => (w.status ? w.status !== "active" : true))
       .map((w) => {
         const id = pickId(w);
-        const title = w.trainingName ?? (w.trainingId ? `Treino ${w.trainingId}` : "Treino");
+        const title = w.trainingName ?? "Treino";
 
         const end = w.finishedAt ?? w.endedAt ?? undefined;
-        const sortTs = getSortTs(w);
+        const sortTime =
+          new Date(end ?? w.startedAt ?? 0).getTime() || 0;
 
         const dateLabel = formatDateTimeBR(end ?? w.startedAt);
-        const durationLabel = formatDuration(w.startedAt, end);
+        const durationLabel = formatMinutesFromDates(w.startedAt, end);
 
         const stats = computeStats(w.performedExercises);
 
@@ -163,20 +187,39 @@ export default function WorkoutsPage() {
           repsTotal: stats.repsTotal,
           volumeTotal: stats.volumeTotal,
           executed: stats.executed,
-          sortTs,
+          sortTime,
         };
       })
       .filter((w) => !!w.id)
-      .sort((a, b) => b.sortTs - a.sortTs);
-
-    return normalized;
+      .sort((a, b) => (b.sortTime || 0) - (a.sortTime || 0));
   }, [raw]);
+
+  const items = useMemo(() => {
+    if (range === "all") return itemsAll;
+
+    const days = range === "7d" ? 7 : 30;
+    return itemsAll.filter((i) => isInLastDays(i.sortTime, days));
+  }, [itemsAll, range]);
 
   const summary = useMemo(() => {
     const executedCount = items.filter((i) => i.executed).length;
     const totalVolume = items.reduce((acc, i) => acc + (i.volumeTotal ?? 0), 0);
     return { executedCount, totalVolume };
   }, [items]);
+
+  // ✅ badges úteis por card (Hoje / Esta semana)
+  function renderBadges(sortTime: number) {
+    const now = Date.now();
+    const isToday = isSameDay(sortTime, now);
+    const inWeek = isInThisWeek(sortTime);
+
+    return (
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {isToday && <div className="history-chip history-chip--ok">Hoje</div>}
+        {!isToday && inWeek && <div className="history-chip">Esta semana</div>}
+      </div>
+    );
+  }
 
   return (
     <main className="corefit-bg">
@@ -191,9 +234,42 @@ export default function WorkoutsPage() {
             </div>
           </div>
 
-          <button className="history-filter" type="button" disabled>
-            Filtrar
-          </button>
+          {/* ✅ filtro real */}
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              className="history-filter"
+              type="button"
+              onClick={() => setRange("7d")}
+              style={{
+                opacity: range === "7d" ? 1 : 0.75,
+                borderColor: range === "7d" ? "rgba(34,197,94,0.45)" : undefined,
+              }}
+            >
+              7 dias
+            </button>
+            <button
+              className="history-filter"
+              type="button"
+              onClick={() => setRange("30d")}
+              style={{
+                opacity: range === "30d" ? 1 : 0.75,
+                borderColor: range === "30d" ? "rgba(34,197,94,0.45)" : undefined,
+              }}
+            >
+              30 dias
+            </button>
+            <button
+              className="history-filter"
+              type="button"
+              onClick={() => setRange("all")}
+              style={{
+                opacity: range === "all" ? 1 : 0.75,
+                borderColor: range === "all" ? "rgba(34,197,94,0.45)" : undefined,
+              }}
+            >
+              Tudo
+            </button>
+          </div>
         </div>
 
         {/* Summary cards */}
@@ -225,7 +301,9 @@ export default function WorkoutsPage() {
         {!loading && !error && items.length === 0 && (
           <div className="card-dark">
             <div style={{ fontWeight: 900, marginBottom: 6 }}>Nada por aqui ainda</div>
-            <div className="text-muted-soft">Finalize um treino para aparecer no histórico.</div>
+            <div className="text-muted-soft">
+              Nenhum treino encontrado nesse período. Tenta “Tudo” ou finalize um treino.
+            </div>
           </div>
         )}
 
@@ -236,11 +314,14 @@ export default function WorkoutsPage() {
                 <div className="history-card-head">
                   <div className="history-card-title">{w.title}</div>
 
-                  {w.executed ? (
-                    <div className="history-chip history-chip--ok">Executado</div>
-                  ) : (
-                    <div className="history-chip">Sem execução</div>
-                  )}
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                    {renderBadges(w.sortTime)}
+                    {w.executed ? (
+                      <div className="history-chip history-chip--ok">Executado</div>
+                    ) : (
+                      <div className="history-chip">Sem execução</div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="history-card-meta">

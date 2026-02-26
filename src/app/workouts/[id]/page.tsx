@@ -1,12 +1,12 @@
-// corefit-frontend/src/app/workouts/page.tsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { apiFetch } from "@/lib/apiFetch";
 
-type WorkoutApiItem = {
+type WorkoutDetail = {
   id?: string;
   _id?: string;
 
@@ -16,10 +16,9 @@ type WorkoutApiItem = {
   status?: "active" | "finished";
 
   startedAt?: string;   // ISO
-  finishedAt?: string;  // ISO (se existir)
-  endedAt?: string;     // ISO (alguns backends usam endedAt)
+  finishedAt?: string;  // ISO
+  endedAt?: string;     // ISO
 
-  // seu backend já tem performedExercises
   performedExercises?: {
     exerciseName: string;
     order: number;
@@ -28,18 +27,7 @@ type WorkoutApiItem = {
   }[];
 };
 
-type HistoryItem = {
-  id: string;
-  title: string;
-  dateLabel: string;
-  durationLabel: string;
-  setsTotal: number | null;
-  repsTotal: number | null;
-  volumeTotal: number | null;
-  executed: boolean;
-};
-
-function pickId(w: WorkoutApiItem) {
+function pickId(w: WorkoutDetail) {
   return String(w.id ?? w._id ?? "");
 }
 
@@ -64,7 +52,7 @@ function formatMinutesFromDates(start?: string, end?: string) {
   return `Duração: ${mins} min`;
 }
 
-function computeStats(performed?: WorkoutApiItem["performedExercises"]) {
+function computeSummary(performed?: WorkoutDetail["performedExercises"]) {
   const exs = performed ?? [];
   let sets = 0;
   let reps = 0;
@@ -75,7 +63,6 @@ function computeStats(performed?: WorkoutApiItem["performedExercises"]) {
     for (const s of arr) {
       const r = safeNumber(s.reps);
       const w = safeNumber(s.weight);
-      // considera série executada se tiver reps>0 ou weight>0
       if (r > 0 || w > 0) {
         sets += 1;
         reps += r;
@@ -88,92 +75,53 @@ function computeStats(performed?: WorkoutApiItem["performedExercises"]) {
 
   return {
     executed,
-    setsTotal: executed ? sets : null,
-    repsTotal: executed ? reps : null,
-    volumeTotal: executed ? Math.round(volume) : null,
+    setsTotal: executed ? sets : 0,
+    repsTotal: executed ? reps : 0,
+    volumeTotal: executed ? Math.round(volume) : 0,
   };
 }
 
-export default function WorkoutsHistoryPage() {
+export default function WorkoutDetailPage() {
   useRequireAuth();
 
-  // 🔧 AJUSTE AQUI se seu backend usar outro endpoint pra listar finalizados
-  // opções comuns:
-  // "/workouts" (e filtra no front)
-  // "/workouts/finished"
-  // "/workouts/history"
-  const HISTORY_ENDPOINT = "/workouts";
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const workoutId = params?.id;
 
-  const [raw, setRaw] = useState<WorkoutApiItem[]>([]);
+  const [data, setData] = useState<WorkoutDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
+      if (!workoutId) return;
+
       setLoading(true);
       setError(null);
 
       try {
-        const data = await apiFetch<WorkoutApiItem[] | { items: WorkoutApiItem[] }>(HISTORY_ENDPOINT);
-
-        const list = Array.isArray(data) ? data : Array.isArray((data as any)?.items) ? (data as any).items : [];
-        setRaw(list);
+        const w = await apiFetch<WorkoutDetail>(`/workouts/${workoutId}`);
+        setData(w);
       } catch (e: any) {
-        setError(e?.message ?? "Erro ao carregar histórico");
-        setRaw([]);
+        setError(e?.message ?? "Erro ao carregar treino");
+        setData(null);
       } finally {
         setLoading(false);
       }
     }
 
     load();
-  }, []);
+  }, [workoutId]);
 
-  const items: HistoryItem[] = useMemo(() => {
-    const normalized = (raw ?? [])
-      .map((w) => {
-        const id = pickId(w);
-        const title = w.trainingName ?? "Treino";
+  const end = data?.finishedAt ?? data?.endedAt ?? undefined;
 
-        const end = w.finishedAt ?? w.endedAt ?? undefined;
-        const dateLabel = formatDateTimeBR(end ?? w.startedAt);
-        const durationLabel = formatMinutesFromDates(w.startedAt, end);
+  const exercises = useMemo(() => {
+    const list = [...(data?.performedExercises ?? [])];
+    list.sort((a, b) => safeNumber(a.order) - safeNumber(b.order));
+    return list;
+  }, [data]);
 
-        const stats = computeStats(w.performedExercises);
-
-        return {
-          id,
-          title,
-          dateLabel,
-          durationLabel,
-          setsTotal: stats.setsTotal,
-          repsTotal: stats.repsTotal,
-          volumeTotal: stats.volumeTotal,
-          executed: stats.executed,
-        };
-      })
-      // filtra finalizados (se vier tudo do backend)
-      .filter((w) => !!w.id)
-      // mais recente primeiro (pelo dateLabel real: usamos finishedAt/endedAt/startedAt em ms)
-      .sort((a, b) => {
-        const wa = raw.find((x) => pickId(x) === a.id);
-        const wb = raw.find((x) => pickId(x) === b.id);
-        const da = new Date(wa?.finishedAt ?? wa?.endedAt ?? wa?.startedAt ?? 0).getTime();
-        const db = new Date(wb?.finishedAt ?? wb?.endedAt ?? wb?.startedAt ?? 0).getTime();
-        return (db || 0) - (da || 0);
-      });
-
-    return normalized;
-  }, [raw]);
-
-  const summary = useMemo(() => {
-    const executedCount = items.filter((i) => i.executed).length;
-    const totalVolume = items.reduce((acc, i) => acc + (i.volumeTotal ?? 0), 0);
-    return {
-      executedCount,
-      totalVolume,
-    };
-  }, [items]);
+  const summary = useMemo(() => computeSummary(data?.performedExercises), [data]);
 
   return (
     <main className="corefit-bg">
@@ -183,36 +131,69 @@ export default function WorkoutsHistoryPage() {
           <div className="history-titlewrap">
             <div className="history-icon">⟲</div>
             <div>
-              <div className="history-title">Histórico</div>
-              <div className="history-subtitle">Seus treinos finalizados</div>
+              <div className="history-title">Detalhe do treino</div>
+              <div className="history-subtitle">
+                {data?.trainingName ?? "Treino"} • {end ? "Finalizado" : "Em andamento"}
+              </div>
             </div>
           </div>
 
-          <button className="history-filter" type="button" disabled>
-            Filtrar
+          <button className="history-filter" type="button" onClick={() => router.back()}>
+            Voltar
           </button>
         </div>
 
-        {/* Summary cards */}
-        <div className="history-summary">
+        {/* Meta info */}
+        <div className="card-dark" style={{ marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontWeight: 900, fontSize: 18 }}>{data?.trainingName ?? "Treino"}</div>
+              <div className="text-muted-soft" style={{ marginTop: 6 }}>
+                <span className="history-meta-dot">•</span>{" "}
+                Início: {formatDateTimeBR(data?.startedAt)}
+                <br />
+                <span className="history-meta-dot">•</span>{" "}
+                Fim: {formatDateTimeBR(end)}
+                <br />
+                <span className="history-meta-dot">•</span>{" "}
+                {formatMinutesFromDates(data?.startedAt, end)}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+              {summary.executed ? (
+                <div className="history-chip history-chip--ok">Executado</div>
+              ) : (
+                <div className="history-chip">Sem execução</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Resumo (Sprint 1) */}
+        <div className="history-summary" style={{ marginBottom: 18 }}>
           <div className="history-summary-card">
-            <div className="history-summary-label">Treinos executados</div>
-            <div className="history-summary-value">{summary.executedCount}</div>
+            <div className="history-summary-label">Séries totais</div>
+            <div className="history-summary-value">{summary.setsTotal}</div>
+          </div>
+
+          <div className="history-summary-card">
+            <div className="history-summary-label">Reps totais</div>
+            <div className="history-summary-value">{summary.repsTotal}</div>
           </div>
 
           <div className="history-summary-card">
             <div className="history-summary-label">Volume total</div>
             <div className="history-summary-value">
-              {summary.totalVolume.toLocaleString("pt-BR")} kg
+              {summary.volumeTotal.toLocaleString("pt-BR")} kg
             </div>
           </div>
         </div>
 
-        <div className="history-section-label">Treinos finalizados (mais recente primeiro)</div>
+        {/* Planejado vs Executado (versão 1: usando targetWeight como “meta”) */}
+        <div className="history-section-label">Planejado vs Executado</div>
 
-        {loading && (
-          <div className="card-dark">Carregando...</div>
-        )}
+        {loading && <div className="card-dark">Carregando...</div>}
 
         {!loading && error && (
           <div className="card-dark" style={{ borderColor: "rgba(239,68,68,0.35)" }}>
@@ -221,64 +202,107 @@ export default function WorkoutsHistoryPage() {
           </div>
         )}
 
-        {!loading && !error && items.length === 0 && (
+        {!loading && !error && !data && (
           <div className="card-dark">
-            <div style={{ fontWeight: 900, marginBottom: 6 }}>Nada por aqui ainda</div>
-            <div className="text-muted-soft">Finalize um treino para aparecer no histórico.</div>
+            <div style={{ fontWeight: 900, marginBottom: 6 }}>Não encontrado</div>
+            <div className="text-muted-soft">Esse treino não existe ou você não tem acesso.</div>
           </div>
         )}
 
-        {!loading && !error && items.length > 0 && (
+        {!loading && !error && data && exercises.length === 0 && (
+          <div className="card-dark">
+            <div style={{ fontWeight: 900, marginBottom: 6 }}>Sem exercícios</div>
+            <div className="text-muted-soft">Não há execução registrada nesse treino.</div>
+          </div>
+        )}
+
+        {!loading && !error && data && exercises.length > 0 && (
           <div className="history-list">
-            {items.map((w) => (
-              <div key={w.id} className="history-card">
-                <div className="history-card-head">
-                  <div className="history-card-title">{w.title}</div>
+            {exercises.map((ex) => {
+              const sets = (ex.setsPerformed ?? []).filter(
+                (s) => safeNumber(s.reps) > 0 || safeNumber(s.weight) > 0
+              );
 
-                  {w.executed ? (
-                    <div className="history-chip history-chip--ok">Executado</div>
-                  ) : (
-                    <div className="history-chip">Sem execução</div>
-                  )}
-                </div>
+              // estatísticas por exercício
+              const exSets = sets.length;
+              const exReps = sets.reduce((acc, s) => acc + safeNumber(s.reps), 0);
+              const exVol = Math.round(sets.reduce((acc, s) => acc + safeNumber(s.reps) * safeNumber(s.weight), 0));
 
-                <div className="history-card-meta">
-                  <div className="history-meta-row">
-                    <span className="history-meta-dot">•</span>
-                    <span>{w.dateLabel}</span>
-                  </div>
-                  <div className="history-meta-row">
-                    <span className="history-meta-dot">•</span>
-                    <span>{w.durationLabel}</span>
-                  </div>
-                </div>
+              return (
+                <div key={`${ex.order}-${ex.exerciseName}`} className="history-card">
+                  <div className="history-card-head">
+                    <div className="history-card-title">
+                      <span style={{ opacity: 0.6, marginRight: 8 }}>#{ex.order + 1}</span>
+                      {ex.exerciseName}
+                    </div>
 
-                <div className="history-stats">
-                  <div className="history-stat">
-                    <div className="history-stat-label">Séries</div>
-                    <div className="history-stat-value">{w.setsTotal ?? "-"}</div>
+                    {typeof ex.targetWeight === "number" ? (
+                      <div className="history-chip history-chip--ok">Meta: {ex.targetWeight}kg</div>
+                    ) : (
+                      <div className="history-chip">Sem meta</div>
+                    )}
                   </div>
 
-                  <div className="history-stat">
-                    <div className="history-stat-label">Reps</div>
-                    <div className="history-stat-value">{w.repsTotal ?? "-"}</div>
-                  </div>
+                  <div className="history-stats" style={{ marginTop: 12 }}>
+                    <div className="history-stat">
+                      <div className="history-stat-label">Séries</div>
+                      <div className="history-stat-value">{exSets || "-"}</div>
+                    </div>
 
-                  <div className="history-stat">
-                    <div className="history-stat-label">Volume</div>
-                    <div className="history-stat-value">
-                      {w.volumeTotal != null ? `${w.volumeTotal.toLocaleString("pt-BR")} kg` : "-"}
+                    <div className="history-stat">
+                      <div className="history-stat-label">Reps</div>
+                      <div className="history-stat-value">{exReps || "-"}</div>
+                    </div>
+
+                    <div className="history-stat">
+                      <div className="history-stat-label">Volume</div>
+                      <div className="history-stat-value">
+                        {exSets ? `${exVol.toLocaleString("pt-BR")} kg` : "-"}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="history-actions">
-                  <Link className="history-link" href={`/workouts/${w.id}`}>
-                    Ver detalhes <span className="history-arrow">›</span>
-                  </Link>
+                  <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
+                    {sets.length === 0 ? (
+                      <div className="text-muted-soft">Sem execução registrada.</div>
+                    ) : (
+                      sets.map((s, idx) => (
+                        <div
+                          key={idx}
+                          className="card-dark"
+                          style={{
+                            padding: "10px 12px",
+                            borderRadius: 14,
+                            background: "rgba(255,255,255,0.04)",
+                          }}
+                        >
+                          <div style={{ fontWeight: 900 }}>
+                            Série {idx + 1}
+                            <span style={{ opacity: 0.45, margin: "0 8px" }}>•</span>
+                            {safeNumber(s.reps)} reps
+                            <span style={{ opacity: 0.45, margin: "0 8px" }}>•</span>
+                            {safeNumber(s.weight)} kg
+                          </div>
+
+                          {/* indicador simples “meta vs feito” quando tiver meta */}
+                          {typeof ex.targetWeight === "number" && (
+                            <div className="text-muted-soft" style={{ marginTop: 4 }}>
+                              {safeNumber(s.weight) >= ex.targetWeight ? "✅ Acima/Bateu a meta" : "⬆️ Abaixo da meta"}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="history-actions" style={{ marginTop: 14 }}>
+                    <Link className="history-link" href="/workouts">
+                      Voltar pro histórico <span className="history-arrow">›</span>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
