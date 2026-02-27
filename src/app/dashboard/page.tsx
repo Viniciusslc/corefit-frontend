@@ -26,32 +26,61 @@ type ActiveWorkout = {
   id?: string;
   _id?: string;
   status?: "active" | "finished";
-  trainingId?: string;
-  trainingName?: string;
-  startedAt?: string;
 };
 
 type WorkoutApiItem = {
   id?: string;
   _id?: string;
   status?: "active" | "finished";
-  trainingId?: string;
-  trainingName?: string;
   startedAt?: string;
   finishedAt?: string;
   endedAt?: string;
+  trainingId?: string;
+  trainingName?: string;
 };
 
-function pickId<T extends { id?: string; _id?: string }>(x: T) {
-  return String(x?.id ?? x?._id ?? "");
+type LastFinishedRef = {
+  trainingId: string | null;
+  trainingName: string | null;
+};
+
+function pickId(obj: { id?: string; _id?: string } | null | undefined): string {
+  return String(obj?.id ?? obj?._id ?? "");
 }
 
-function pickTrainingIdFromWorkout(w: WorkoutApiItem) {
-  return String(w?.trainingId ?? "");
+function safeTimeMs(iso?: string) {
+  if (!iso) return 0;
+  const ms = new Date(iso).getTime();
+  return Number.isFinite(ms) ? ms : 0;
 }
 
-function pickWorkoutEndIso(w: WorkoutApiItem) {
-  return w?.finishedAt ?? w?.endedAt ?? w?.startedAt ?? null;
+function normalizeName(s: any) {
+  return String(s ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+// Pega ordem por "Treino A/B/C" (estável)
+function trainingOrderKey(name?: string) {
+  const s = String(name ?? "").toUpperCase();
+
+  const m = s.match(/\bTREINO\s*([A-Z])\b/);
+  if (m?.[1]) return m[1].charCodeAt(0); // A=65, B=66, C=67...
+
+  const n = s.match(/\bTREINO\s*(\d+)\b/);
+  if (n?.[1]) return 1000 + Number(n[1]);
+
+  return 9999;
+}
+
+function sortTrainingsStable(list: Training[]) {
+  return [...list].sort((a: Training, b: Training) => {
+    const ka = trainingOrderKey(a.name);
+    const kb = trainingOrderKey(b.name);
+    if (ka !== kb) return ka - kb;
+    return String(a.name).localeCompare(String(b.name), "pt-BR");
+  });
 }
 
 export default function DashboardPage() {
@@ -59,8 +88,13 @@ export default function DashboardPage() {
 
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [hasActiveWorkout, setHasActiveWorkout] = useState(false);
-  const [lastFinishedTrainingId, setLastFinishedTrainingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // referência do último treino finalizado (id + nome)
+  const [lastFinished, setLastFinished] = useState<LastFinishedRef>({
+    trainingId: null,
+    trainingName: null,
+  });
 
   // força refresh dos KPIs quando iniciar treino
   const [refreshKey, setRefreshKey] = useState(() => String(Date.now()));
@@ -76,22 +110,21 @@ export default function DashboardPage() {
         try {
           const active = await apiFetch<ActiveWorkout | null>("/workouts/active");
           if (!mounted) return;
-
-          const activeExists = !!(active?.id || active?._id);
-          setHasActiveWorkout(activeExists);
+          setHasActiveWorkout(!!pickId(active ?? undefined));
         } catch {
           if (!mounted) return;
           setHasActiveWorkout(false);
         }
 
-        // 2) carrega treinos
+        // 2) carrega treinos (já ordena A/B/C)
         const ts = await apiFetch<Training[]>("/trainings");
         if (!mounted) return;
 
         const trainingsList: Training[] = Array.isArray(ts) ? ts : [];
-        setTrainings(trainingsList);
+        const sortedTrainings = sortTrainingsStable(trainingsList);
+        setTrainings(sortedTrainings);
 
-        // 3) último treino finalizado → sugerir próximo no ciclo
+        // 3) pega o último treino FINALIZADO
         try {
           const ws = await apiFetch<WorkoutApiItem[] | { items: WorkoutApiItem[] }>("/workouts");
           if (!mounted) return;
@@ -102,30 +135,36 @@ export default function DashboardPage() {
               ? (ws as any).items
               : [];
 
-          type WithEnd = { w: WorkoutApiItem; endMs: number };
+          // só finalizados MESMO
+          const finishedOnly = (list ?? []).filter(
+            (w: WorkoutApiItem) => w.status === "finished"
+          );
 
-          const finishedSorted: WithEnd[] = (list ?? [])
-            .filter((w: WorkoutApiItem) => (w?.status ? w.status === "finished" : true))
+          const ranked = finishedOnly
             .map((w: WorkoutApiItem) => {
-              const endIso = pickWorkoutEndIso(w);
-              const endMs = endIso ? new Date(endIso).getTime() : 0;
-              return { w, endMs };
+              const endIso = w.finishedAt ?? w.endedAt ?? w.startedAt;
+              return {
+                trainingId: String(w.trainingId ?? ""),
+                trainingName: String(w.trainingName ?? ""),
+                endMs: safeTimeMs(endIso),
+              };
             })
-            .filter((x: WithEnd) => Number.isFinite(x.endMs) && x.endMs > 0)
-            .sort((a: WithEnd, b: WithEnd) => b.endMs - a.endMs);
+            .filter((x) => x.endMs > 0 && (x.trainingId || x.trainingName))
+            .sort((a, b) => b.endMs - a.endMs);
 
-          const last = finishedSorted[0]?.w;
-          const lastTid = last ? pickTrainingIdFromWorkout(last) : "";
-
-          setLastFinishedTrainingId(lastTid || null);
+          const last = ranked[0];
+          setLastFinished({
+            trainingId: last?.trainingId ? last.trainingId : null,
+            trainingName: last?.trainingName ? last.trainingName : null,
+          });
         } catch {
           if (!mounted) return;
-          setLastFinishedTrainingId(null);
+          setLastFinished({ trainingId: null, trainingName: null });
         }
       } catch {
         if (!mounted) return;
         setTrainings([]);
-        setLastFinishedTrainingId(null);
+        setLastFinished({ trainingId: null, trainingName: null });
       } finally {
         if (!mounted) return;
         setLoading(false);
@@ -138,22 +177,40 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // ✅ próximo treino do ciclo baseado no último finalizado
   const nextTraining = useMemo(() => {
-    if (!trainings?.length) return null;
+    if (!trainings.length) return null;
 
-    if (!lastFinishedTrainingId) return trainings[0];
+    // 1) tenta achar pelo trainingId do workout
+    if (lastFinished.trainingId) {
+      const idx = trainings.findIndex(
+        (t: Training) => pickId(t) === lastFinished.trainingId
+      );
+      if (idx >= 0) return trainings[(idx + 1) % trainings.length] ?? trainings[0];
+    }
 
-    const idx = trainings.findIndex((t: Training) => pickId(t) === String(lastFinishedTrainingId));
-    if (idx < 0) return trainings[0];
+    // 2) fallback: tenta achar pelo trainingName (normalizado)
+    if (lastFinished.trainingName) {
+      const lastName = normalizeName(lastFinished.trainingName);
+      const idxByName = trainings.findIndex(
+        (t: Training) => normalizeName(t.name) === lastName
+      );
+      if (idxByName >= 0) return trainings[(idxByName + 1) % trainings.length] ?? trainings[0];
+    }
 
-    const nextIdx = (idx + 1) % trainings.length;
-    return trainings[nextIdx];
-  }, [trainings, lastFinishedTrainingId]);
+    // 3) fallback final: pega o próximo pela “ordem” A/B/C (pela letra do treino)
+    if (lastFinished.trainingName) {
+      const lastKey = trainingOrderKey(lastFinished.trainingName);
+      const sorted = trainings; // já ordenado
+      const next = sorted.find((t) => trainingOrderKey(t.name) > lastKey);
+      return next ?? sorted[0];
+    }
+
+    // default
+    return trainings[0];
+  }, [trainings, lastFinished.trainingId, lastFinished.trainingName]);
 
   const heroData = useMemo(() => {
     const t = nextTraining;
-
     if (!t) {
       return {
         trainingId: undefined as string | undefined,
