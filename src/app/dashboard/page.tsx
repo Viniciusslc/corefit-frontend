@@ -1,3 +1,4 @@
+// corefit-frontend/src/app/dashboard/page.tsx
 "use client";
 
 import "./dashboard.css";
@@ -25,10 +26,32 @@ type ActiveWorkout = {
   id?: string;
   _id?: string;
   status?: "active" | "finished";
+  trainingId?: string;
+  trainingName?: string;
+  startedAt?: string;
 };
 
-function pickId(t: any) {
-  return t?.id ?? t?._id ?? "";
+type WorkoutApiItem = {
+  id?: string;
+  _id?: string;
+  status?: "active" | "finished";
+  trainingId?: string;
+  trainingName?: string;
+  startedAt?: string;
+  finishedAt?: string;
+  endedAt?: string;
+};
+
+function pickId<T extends { id?: string; _id?: string }>(x: T) {
+  return String(x?.id ?? x?._id ?? "");
+}
+
+function pickTrainingIdFromWorkout(w: WorkoutApiItem) {
+  return String(w?.trainingId ?? "");
+}
+
+function pickWorkoutEndIso(w: WorkoutApiItem) {
+  return w?.finishedAt ?? w?.endedAt ?? w?.startedAt ?? null;
 }
 
 export default function DashboardPage() {
@@ -36,6 +59,7 @@ export default function DashboardPage() {
 
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [hasActiveWorkout, setHasActiveWorkout] = useState(false);
+  const [lastFinishedTrainingId, setLastFinishedTrainingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // força refresh dos KPIs quando iniciar treino
@@ -52,7 +76,9 @@ export default function DashboardPage() {
         try {
           const active = await apiFetch<ActiveWorkout | null>("/workouts/active");
           if (!mounted) return;
-          setHasActiveWorkout(!!(active?.id || active?._id));
+
+          const activeExists = !!(active?.id || active?._id);
+          setHasActiveWorkout(activeExists);
         } catch {
           if (!mounted) return;
           setHasActiveWorkout(false);
@@ -61,10 +87,45 @@ export default function DashboardPage() {
         // 2) carrega treinos
         const ts = await apiFetch<Training[]>("/trainings");
         if (!mounted) return;
-        setTrainings(Array.isArray(ts) ? ts : []);
+
+        const trainingsList: Training[] = Array.isArray(ts) ? ts : [];
+        setTrainings(trainingsList);
+
+        // 3) último treino finalizado → sugerir próximo no ciclo
+        try {
+          const ws = await apiFetch<WorkoutApiItem[] | { items: WorkoutApiItem[] }>("/workouts");
+          if (!mounted) return;
+
+          const list: WorkoutApiItem[] = Array.isArray(ws)
+            ? ws
+            : Array.isArray((ws as any)?.items)
+              ? (ws as any).items
+              : [];
+
+          type WithEnd = { w: WorkoutApiItem; endMs: number };
+
+          const finishedSorted: WithEnd[] = (list ?? [])
+            .filter((w: WorkoutApiItem) => (w?.status ? w.status === "finished" : true))
+            .map((w: WorkoutApiItem) => {
+              const endIso = pickWorkoutEndIso(w);
+              const endMs = endIso ? new Date(endIso).getTime() : 0;
+              return { w, endMs };
+            })
+            .filter((x: WithEnd) => Number.isFinite(x.endMs) && x.endMs > 0)
+            .sort((a: WithEnd, b: WithEnd) => b.endMs - a.endMs);
+
+          const last = finishedSorted[0]?.w;
+          const lastTid = last ? pickTrainingIdFromWorkout(last) : "";
+
+          setLastFinishedTrainingId(lastTid || null);
+        } catch {
+          if (!mounted) return;
+          setLastFinishedTrainingId(null);
+        }
       } catch {
         if (!mounted) return;
         setTrainings([]);
+        setLastFinishedTrainingId(null);
       } finally {
         if (!mounted) return;
         setLoading(false);
@@ -77,17 +138,25 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const todaysTraining = useMemo(() => {
-    // escolha simples: primeiro treino da lista
+  // ✅ próximo treino do ciclo baseado no último finalizado
+  const nextTraining = useMemo(() => {
     if (!trainings?.length) return null;
-    return trainings[0];
-  }, [trainings]);
+
+    if (!lastFinishedTrainingId) return trainings[0];
+
+    const idx = trainings.findIndex((t: Training) => pickId(t) === String(lastFinishedTrainingId));
+    if (idx < 0) return trainings[0];
+
+    const nextIdx = (idx + 1) % trainings.length;
+    return trainings[nextIdx];
+  }, [trainings, lastFinishedTrainingId]);
 
   const heroData = useMemo(() => {
-    const t = todaysTraining;
+    const t = nextTraining;
+
     if (!t) {
       return {
-        trainingId: undefined,
+        trainingId: undefined as string | undefined,
         workoutName: "Crie um treino para começar",
         workoutType: "Sem treino",
         exerciseCount: 0,
@@ -100,7 +169,7 @@ export default function DashboardPage() {
       workoutType: t.type ?? "Treino",
       exerciseCount: t.exercises?.length ?? 0,
     };
-  }, [todaysTraining]);
+  }, [nextTraining]);
 
   return (
     <div className="corefit-bg">
@@ -109,7 +178,6 @@ export default function DashboardPage() {
           <div className="card-dark p-4">Carregando dashboard…</div>
         ) : (
           <div className="dashboard-stack">
-            {/* HERO */}
             <HeroWorkout
               trainingId={heroData.trainingId}
               workoutName={heroData.workoutName}
@@ -122,18 +190,12 @@ export default function DashboardPage() {
               }}
             />
 
-            {/* KPIs */}
             <StatsCards refreshKey={refreshKey} />
-
-            {/* ✅ NOVO: Evolução (Sprint 1) */}
             <ProgressSection refreshKey={refreshKey} />
 
-            {/* GRID (esquerda: listagem / direita: ultimo treino) */}
             <div className="dashboard-grid">
               <div className="left-col">
                 <WorkoutsList />
-
-                {/* Ações rápidas */}
                 <QuickActions />
               </div>
 
