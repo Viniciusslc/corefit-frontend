@@ -1,12 +1,56 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 /* ===========================
    GLOBAL THEME (Corefit)
 =========================== */
+
+:root {
+  /* ===== Corefit Tokens ===== */
+
+  /* cores base */
+  --cf-bg: #050505;
+  --cf-surface: rgba(17, 17, 17, 0.86);
+  --cf-surface-2: rgba(255, 255, 255, 0.04);
+
+  --cf-border: rgba(255, 255, 255, 0.08);
+  --cf-border-strong: rgba(255, 255, 255, 0.14);
+
+  --cf-text: rgba(229, 231, 235, 0.96);
+  --cf-muted: rgba(229, 231, 235, 0.72);
+  --cf-muted-2: rgba(229, 231, 235, 0.56);
+
+  /* brand */
+  --cf-green: #22c55e;
+  --cf-green-2: rgba(34, 197, 94, 0.18);
+  --cf-green-border: rgba(34, 197, 94, 0.28);
+
+  /* estados */
+  --cf-danger: #ef4444;
+  --cf-danger-bg: rgba(239, 68, 68, 0.14);
+  --cf-warn: #f59e0b;
+  --cf-info: #38bdf8;
+
+  /* radius */
+  --cf-radius-sm: 10px;
+  --cf-radius-md: 16px;
+  --cf-radius-lg: 20px;
+
+  /* sombras */
+  --cf-shadow-sm: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --cf-shadow-md: 0 14px 40px rgba(0, 0, 0, 0.45);
+
+  /* foco */
+  --cf-ring: 0 0 0 3px rgba(34, 197, 94, 0.22);
+
+  /* motion */
+  --cf-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --cf-fast: 160ms;
+  --cf-normal: 220ms;
+
+  /* layout */
+  --cf-container: 1120px;
+}
 
 :root {
   --background: 0 0% 5%;
@@ -28,12 +72,12 @@ body {
    Corefit BG (igual dashboard)
 ========================= */
 .corefit-bg {
-  min-height: 100vh;
+  color: var(--cf-text);
   background:
-    radial-gradient(900px 350px at 25% 0%, rgba(34, 197, 94, 0.16), transparent 55%),
+    radial-gradient(900px 350px at 25% 0, rgba(34, 197, 94, 0.16), transparent 55%),
     radial-gradient(700px 300px at 70% 15%, rgba(34, 197, 94, 0.10), transparent 60%),
-    #050505;
-  color: #e5e7eb;
+    var(--cf-bg);
+  min-height: 100vh;
 }
 
 /* Container padrão */
@@ -937,4 +981,104 @@ body {
   border-color: #22c55e;
 }
 
+}
+
+/* ===== Corefit UI Primitives ===== */
+
+.cf-card {
+  background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-md);
+  box-shadow: var(--cf-shadow-md);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.cf-divider {
+  height: 1px;
+  background: var(--cf-border);
+  width: 100%;
+}
+
+.cf-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--cf-border);
+  color: var(--cf-text);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color var(--cf-fast) var(--cf-ease), box-shadow var(--cf-fast) var(--cf-ease);
+}
+
+.cf-input:focus {
+  border-color: var(--cf-green-border);
+  box-shadow: var(--cf-ring);
+}
+
+.cf-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 800;
+  border: 1px solid transparent;
+  transition: transform var(--cf-fast) var(--cf-ease), filter var(--cf-fast) var(--cf-ease),
+    background var(--cf-fast) var(--cf-ease), border-color var(--cf-fast) var(--cf-ease);
+  user-select: none;
+}
+
+.cf-btn:active {
+  transform: scale(0.98);
+}
+
+.cf-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cf-btn-primary {
+  background: var(--cf-green);
+  color: #03150a;
+}
+
+.cf-btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.cf-btn-soft {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--cf-border);
+  color: var(--cf-text);
+}
+
+.cf-btn-soft:hover {
+  border-color: var(--cf-border-strong);
+}
+
+.cf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid var(--cf-border);
+  color: var(--cf-muted);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cf-badge-success {
+  border-color: var(--cf-green-border);
+  background: var(--cf-green-2);
+  color: rgba(134, 239, 172, 0.95);
 }

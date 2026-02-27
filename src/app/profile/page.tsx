@@ -214,7 +214,7 @@ export default function ProfilePage() {
           <div className="dashboard-stack">
             {/* Card Perfil */}
             <div style={{ width: "min(860px, 96vw)", margin: "0 auto" }}>
-              <div className="card-dark glow-green hero-animate hero-delay-1" style={{ overflow: "visible" }}>
+              <div className="card-dark glow-green hero-animate hero-delay-1">
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
                   <div>
                     <h1 style={{ fontSize: 22, fontWeight: 900, marginBottom: 6 }}>Perfil</h1>

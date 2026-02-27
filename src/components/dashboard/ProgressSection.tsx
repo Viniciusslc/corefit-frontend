@@ -264,10 +264,17 @@ export function ProgressSection({ refreshKey }: Props) {
                 return (
                   <div
                     key={d.dayKey}
-                    style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
                   >
                     <div
-                      className={`day-card ${d.isToday ? "day-card-active" : ""} ${isMax ? "day-card-max" : ""}`}
+                      className={`day-card ${d.isToday ? "day-card-active" : ""} ${
+                        isMax ? "day-card-max" : ""
+                      }`}
                       title={`${d.volume.toLocaleString("pt-BR")} kg • ${d.workouts} treino(s)`}
                       style={{
                         width: "100%",

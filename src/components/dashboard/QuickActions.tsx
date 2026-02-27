@@ -3,11 +3,14 @@
 import { useRouter } from "next/navigation";
 import { RefreshCcw, PencilLine, Sparkles, TrendingUp } from "lucide-react";
 
+import { CFCard } from "@/components/ui/CFCard";
+import { CFButton } from "@/components/ui/CFButton";
+
 export function QuickActions() {
   const router = useRouter();
 
   return (
-    <div className="card-dark">
+    <CFCard>
       <div className="section-head">
         <div className="section-head-left">
           <span className="section-icon">
@@ -15,7 +18,10 @@ export function QuickActions() {
           </span>
           <div>
             <div className="section-title">Ações rápidas</div>
-            <div className="text-muted-soft" style={{ fontSize: 12, marginTop: 2 }}>
+            <div
+              className="text-muted-soft"
+              style={{ fontSize: 12, marginTop: 2 }}
+            >
               Atalhos para acelerar sua evolução.
             </div>
           </div>
@@ -24,10 +30,10 @@ export function QuickActions() {
 
       <div className="qa-grid">
         {/* Novo ciclo */}
-        <button
-          type="button"
-          className="qa-tile qa-tile--primary"
+        <CFButton
+          variant="primary"
           onClick={() => router.push("/trainings?newCycle=1")}
+          className="qa-tile"
         >
           <div className="qa-ic">
             <RefreshCcw size={16} />
@@ -36,10 +42,14 @@ export function QuickActions() {
             <b>Novo ciclo</b>
             <span>Iniciar novo plano</span>
           </div>
-        </button>
+        </CFButton>
 
         {/* Editar treino */}
-        <button type="button" className="qa-tile" onClick={() => router.push("/trainings")}>
+        <CFButton
+          variant="soft"
+          onClick={() => router.push("/trainings")}
+          className="qa-tile"
+        >
           <div className="qa-ic">
             <PencilLine size={16} />
           </div>
@@ -47,10 +57,14 @@ export function QuickActions() {
             <b>Editar treino</b>
             <span>Ajustar exercícios</span>
           </div>
-        </button>
+        </CFButton>
 
-        {/* IA Coach (Em construção) */}
-        <button type="button" className="qa-tile" onClick={() => router.push("/ai-coach")}>
+        {/* IA Coach */}
+        <CFButton
+          variant="soft"
+          onClick={() => router.push("/ai-coach")}
+          className="qa-tile"
+        >
           <div className="qa-ic">
             <Sparkles size={16} />
           </div>
@@ -58,10 +72,14 @@ export function QuickActions() {
             <b>IA Coach</b>
             <span>Em construção</span>
           </div>
-        </button>
+        </CFButton>
 
         {/* Progresso */}
-        <button type="button" className="qa-tile" onClick={() => router.push("/workouts")}>
+        <CFButton
+          variant="soft"
+          onClick={() => router.push("/workouts")}
+          className="qa-tile"
+        >
           <div className="qa-ic">
             <TrendingUp size={16} />
           </div>
@@ -69,8 +87,8 @@ export function QuickActions() {
             <b>Progresso</b>
             <span>Ver evolução</span>
           </div>
-        </button>
+        </CFButton>
       </div>
-    </div>
+    </CFCard>
   );
 }

@@ -4,6 +4,9 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 
+import { CFCard } from "@/components/ui/CFCard";
+import { CFButton } from "@/components/ui/CFButton";
+
 type Props = {
   trainingId?: string;
   workoutName: string;
@@ -68,11 +71,9 @@ function firstNameFromFullName(full: string | null): string | null {
 function prettyName(first: string | null): string | null {
   if (!first) return null;
 
-  // se vier “Usuário” (ex.: seed / placeholder), troca por “Atleta”
   const lowered = first.toLowerCase();
   if (lowered === "usuário" || lowered === "usuario") return "Atleta";
 
-  // capitaliza
   return first.charAt(0).toUpperCase() + first.slice(1);
 }
 
@@ -100,7 +101,6 @@ export function HeroWorkout({
   const emoji = useMemo(() => pickEmoji(), []);
 
   async function onStart() {
-    // se já tem treino ativo -> vai direto
     if (isActive) {
       router.push("/workouts/active");
       return;
@@ -118,29 +118,34 @@ export function HeroWorkout({
   }
 
   return (
-    <div className="card-dark card-hero p-4 p-md-5 hero-animate hero-delay-1">
+    <CFCard
+      className="card-hero p-4 p-md-5 hero-animate hero-delay-1"
+      style={{
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       <div className="d-flex align-items-center gap-2 mb-2">
         <span className="badge badge-today">HOJE</span>
       </div>
 
       <h2 className="h3 fw-bold mb-1">
         Olá,{" "}
-        <span style={{ color: "#22c55e" }}>
+        <span style={{ color: "var(--cf-green)" }}>
           {greetingName ?? "Atleta"}
         </span>{" "}
-        {emoji}{" "}
-        Pronto para mais um treino?
+        {emoji} Pronto para mais um treino?
       </h2>
 
       <div className="text-muted-soft">
         <b>{workoutType}</b> • {workoutName} • {exerciseCount} exercícios
       </div>
 
-      <div className="mt-3">
-        <button onClick={onStart} className="btn btn-green px-4 py-2">
+      <div className="mt-3" style={{ position: "relative", zIndex: 2 }}>
+        <CFButton onClick={onStart}>
           ▶ Iniciar treino
-        </button>
+        </CFButton>
       </div>
-    </div>
+    </CFCard>
   );
 }

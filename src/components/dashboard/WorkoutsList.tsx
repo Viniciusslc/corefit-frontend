@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 import { Dumbbell, Play } from "lucide-react";
 
+import { CFCard } from "@/components/ui/CFCard";
+import { CFButton } from "@/components/ui/CFButton";
+
 type Training = {
   id?: string;
   _id?: string;
@@ -73,7 +76,6 @@ export function WorkoutsList() {
       return;
     }
 
-    // ✅ Se já existe treino ativo, não inicia outro: só abre o ativo
     if (hasActiveWorkout) {
       alert("Você já possui um treino ativo. Vou te levar para ele.");
       router.push("/workouts/active");
@@ -98,7 +100,7 @@ export function WorkoutsList() {
 
   if (loading) {
     return (
-      <div className="card-dark p-4">
+      <CFCard style={{ padding: 16 }}>
         <div className="d-flex align-items-center justify-content-between mb-3">
           <b>Seus treinos</b>
           <span className="text-muted-soft" style={{ fontSize: 12 }}>
@@ -137,12 +139,12 @@ export function WorkoutsList() {
             </div>
           ))}
         </div>
-      </div>
+      </CFCard>
     );
   }
 
   return (
-    <div className="card-dark p-4">
+    <CFCard style={{ padding: 16 }}>
       <div className="d-flex align-items-center justify-content-between mb-3">
         <b>Seus treinos</b>
 
@@ -166,25 +168,13 @@ export function WorkoutsList() {
           return (
             <div
               key={t.id}
-              className="d-flex align-items-center justify-content-between"
+              className="workout-row d-flex align-items-center justify-content-between"
               style={{
                 borderRadius: 16,
                 border: "1px solid rgba(255,255,255,0.08)",
                 background: "rgba(255,255,255,0.03)",
                 padding: "12px 14px",
                 transition: "all .15s ease",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background =
-                  "rgba(255,255,255,0.05)";
-                (e.currentTarget as HTMLDivElement).style.border =
-                  "1px solid rgba(255,255,255,0.12)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background =
-                  "rgba(255,255,255,0.03)";
-                (e.currentTarget as HTMLDivElement).style.border =
-                  "1px solid rgba(255,255,255,0.08)";
               }}
             >
               {/* ESQUERDA */}
@@ -243,7 +233,8 @@ export function WorkoutsList() {
               </div>
 
               {/* PLAY */}
-              <button
+              <CFButton
+                variant="soft"
                 onClick={() => onStart(t.raw)}
                 disabled={isStarting}
                 title="Iniciar treino"
@@ -251,6 +242,7 @@ export function WorkoutsList() {
                   width: 40,
                   height: 40,
                   borderRadius: 12,
+                  padding: 0,
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -261,8 +253,6 @@ export function WorkoutsList() {
                     ? "rgba(255,255,255,0.06)"
                     : "rgba(34,197,94,0.16)",
                   opacity: isStarting ? 0.7 : 1,
-                  cursor: isStarting ? "not-allowed" : "pointer",
-                  transition: "all .15s ease",
                 }}
               >
                 {isStarting ? (
@@ -270,13 +260,17 @@ export function WorkoutsList() {
                     …
                   </span>
                 ) : (
-                  <Play size={18} color="rgba(34,197,94,0.95)" fill="rgba(34,197,94,0.95)" />
+                  <Play
+                    size={18}
+                    color="rgba(34,197,94,0.95)"
+                    fill="rgba(34,197,94,0.95)"
+                  />
                 )}
-              </button>
+              </CFButton>
             </div>
           );
         })}
       </div>
-    </div>
+    </CFCard>
   );
 }

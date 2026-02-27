@@ -57,7 +57,9 @@ function round1(n: number) {
   return Math.round(n * 10) / 10;
 }
 
-function normalizeSnapshot(exercises: SnapshotExercise[] | undefined): NormalizedSnapshotExercise[] {
+function normalizeSnapshot(
+  exercises: SnapshotExercise[] | undefined
+): NormalizedSnapshotExercise[] {
   const list = Array.isArray(exercises) ? exercises : [];
   return list
     .map((ex, idx) => {
@@ -77,11 +79,17 @@ function normalizeSnapshot(exercises: SnapshotExercise[] | undefined): Normalize
 function getPerformedAvgWeight(sets: { reps: number; weight: number }[]) {
   const valid = sets.filter((s) => (s.reps ?? 0) > 0 || (s.weight ?? 0) > 0);
   if (!valid.length) return 0;
-  return valid.reduce((acc, s) => acc + (Number(s.weight) || 0), 0) / valid.length;
+  return (
+    valid.reduce((acc, s) => acc + (Number(s.weight) || 0), 0) / valid.length
+  );
 }
 
-function getTargetStatus(targetWeight: number, sets: { reps: number; weight: number }[]) {
-  if (!targetWeight || targetWeight <= 0) return { label: "Sem meta", diff: 0, avg: 0 };
+function getTargetStatus(
+  targetWeight: number,
+  sets: { reps: number; weight: number }[]
+) {
+  if (!targetWeight || targetWeight <= 0)
+    return { label: "Sem meta", diff: 0, avg: 0 };
   const avg = getPerformedAvgWeight(sets ?? []);
   if (avg <= 0) return { label: "Sem execução", diff: 0, avg: 0 };
 
@@ -99,7 +107,9 @@ function safeNumber(v: unknown) {
 
 function countDoneSets(performed: PerformedExerciseState[]) {
   return performed.reduce((acc, ex) => {
-    const done = ex.setsPerformed.filter((s) => safeNumber(s.reps) > 0 || safeNumber(s.weight) > 0).length;
+    const done = ex.setsPerformed.filter(
+      (s) => safeNumber(s.reps) > 0 || safeNumber(s.weight) > 0
+    ).length;
     return acc + done;
   }, 0);
 }
@@ -129,7 +139,7 @@ export default function ActiveWorkoutPage() {
 
   const [openOrder, setOpenOrder] = useState<number | null>(null);
 
-  // debounce para salvar performance (sem any)
+  // debounce para salvar performance
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // trava contra finish duplicado
@@ -153,6 +163,7 @@ export default function ActiveWorkoutPage() {
 
   const totalSets = useMemo(() => countTotalSets(snapshot), [snapshot]);
   const doneSets = useMemo(() => countDoneSets(performed), [performed]);
+
   const progressPct = useMemo(() => {
     if (!totalSets) return 0;
     return Math.min(100, Math.max(0, Math.round((doneSets / totalSets) * 100)));
@@ -165,11 +176,15 @@ export default function ActiveWorkoutPage() {
   }, []);
 
   useEffect(() => {
+    let mounted = true;
+
     async function load() {
       setLoading(true);
 
       try {
         const data = await apiFetch<ActiveWorkout | null>("/workouts/active");
+
+        if (!mounted) return;
 
         if (!data) {
           setWorkout(null);
@@ -196,13 +211,12 @@ export default function ActiveWorkoutPage() {
                 exerciseName: ex.name,
                 order: ex.order,
                 targetWeight: ex.targetWeight || 0,
-                setsPerformed:
-                  found?.setsPerformed?.length
-                    ? found.setsPerformed.map((s) => ({
-                        reps: safeNumber(s.reps),
-                        weight: safeNumber(s.weight),
-                      }))
-                    : Array.from({ length: ex.sets }, () => ({ reps: 0, weight: 0 })),
+                setsPerformed: found?.setsPerformed?.length
+                  ? found.setsPerformed.map((s) => ({
+                      reps: safeNumber(s.reps),
+                      weight: safeNumber(s.weight),
+                    }))
+                  : Array.from({ length: ex.sets }, () => ({ reps: 0, weight: 0 })),
               };
             })
           );
@@ -218,12 +232,19 @@ export default function ActiveWorkoutPage() {
         }
       } catch (e) {
         console.error("Erro ao carregar workout ativo:", e);
+        if (!mounted) return;
+        setWorkout(null);
+        setPerformed([]);
       } finally {
+        if (!mounted) return;
         setLoading(false);
       }
     }
 
     load();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   function updateSet(order: number, idx: number, field: "reps" | "weight", value: number) {
@@ -232,7 +253,9 @@ export default function ActiveWorkoutPage() {
         ex.order === order
           ? {
               ...ex,
-              setsPerformed: ex.setsPerformed.map((s, i) => (i === idx ? { ...s, [field]: value } : s)),
+              setsPerformed: ex.setsPerformed.map((s, i) =>
+                i === idx ? { ...s, [field]: value } : s
+              ),
             }
           : ex
       )
@@ -244,26 +267,33 @@ export default function ActiveWorkoutPage() {
       prev.map((ex) => {
         if (ex.order !== order) return ex;
         const cur = ex.setsPerformed[idx] ?? { reps: 0, weight: 0 };
-        const nextVal = field === "weight" ? round1(safeNumber(cur[field]) + delta) : safeNumber(cur[field]) + delta;
+        const nextVal =
+          field === "weight"
+            ? round1(safeNumber(cur[field]) + delta)
+            : safeNumber(cur[field]) + delta;
         const clamped = Math.max(0, nextVal);
 
         return {
           ...ex,
-          setsPerformed: ex.setsPerformed.map((s, i) => (i === idx ? { ...s, [field]: clamped } : s)),
+          setsPerformed: ex.setsPerformed.map((s, i) =>
+            i === idx ? { ...s, [field]: clamped } : s
+          ),
         };
       })
     );
   }
 
   function toggleDone(order: number, idx: number) {
-    // “feito” = se está vazio, coloca 1 rep (ou mantém), se já tem algo, zera tudo
+    // “feito” = se está vazio, coloca 1 rep; se já tem algo, zera tudo
     setPerformed((prev) =>
       prev.map((ex) => {
         if (ex.order !== order) return ex;
         const cur = ex.setsPerformed[idx] ?? { reps: 0, weight: 0 };
         const hasSomething = safeNumber(cur.reps) > 0 || safeNumber(cur.weight) > 0;
 
-        const next = hasSomething ? { reps: 0, weight: 0 } : { reps: Math.max(1, safeNumber(cur.reps) || 1), weight: safeNumber(cur.weight) };
+        const next = hasSomething
+          ? { reps: 0, weight: 0 }
+          : { reps: Math.max(1, safeNumber(cur.reps) || 1), weight: safeNumber(cur.weight) };
 
         return {
           ...ex,
@@ -335,17 +365,46 @@ export default function ActiveWorkoutPage() {
       });
 
       router.push("/dashboard");
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Erro ao finalizar treino:", e);
-      alert(String(e?.message ?? "Não foi possível finalizar o treino. Veja o console."));
+      const msg =
+        typeof e === "object" && e && "message" in e
+          ? String((e as { message?: unknown }).message ?? "")
+          : "";
+      alert(msg || "Não foi possível finalizar o treino. Veja o console.");
       finishingRef.current = false;
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <p className="p-6">Carregando treino...</p>;
-  if (!workout) return <p className="p-6">Nenhum treino ativo.</p>;
+  // ✅ EMPTY STATES (não fica mais “tela preta”)
+  if (loading) {
+    return (
+      <div className="corefit-bg">
+        <div className="corefit-container" style={{ paddingTop: 86, paddingBottom: 40 }}>
+          <div className="card-dark p-4" style={{ color: "rgba(255,255,255,0.92)" }}>
+            Carregando treino…
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!workout) {
+    return (
+      <div className="corefit-bg">
+        <div className="corefit-container" style={{ paddingTop: 86, paddingBottom: 40 }}>
+          <div className="card-dark p-4" style={{ color: "rgba(255,255,255,0.92)" }}>
+            <div style={{ fontWeight: 900, fontSize: 16 }}>Nenhum treino ativo</div>
+            <div style={{ marginTop: 6, opacity: 0.75 }}>
+              Vá em <b>Treinos</b> e clique em <b>Iniciar</b>.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const elapsed = formatElapsed(nowTick - startedAtMs);
 
@@ -382,7 +441,7 @@ export default function ActiveWorkoutPage() {
         <div className="workout-hero card-dark glow-green">
           <div className="workout-hero-row">
             <div className="workout-hero-title">
-              {/* ✅ badge ajustado (não precisa ser redondo) */}
+              {/* badge ajustado */}
               <div
                 className="workout-hero-badge"
                 style={{
@@ -421,7 +480,10 @@ export default function ActiveWorkoutPage() {
 
             const isOpen = openOrder === order;
 
-            const doneInExercise = state.setsPerformed.filter((s) => safeNumber(s.reps) > 0 || safeNumber(s.weight) > 0).length;
+            const doneInExercise = state.setsPerformed.filter(
+              (s) => safeNumber(s.reps) > 0 || safeNumber(s.weight) > 0
+            ).length;
+
             const status = getTargetStatus(ex.targetWeight, state.setsPerformed);
             const showNumbers = ex.targetWeight > 0 && status.avg > 0;
 
@@ -489,14 +551,22 @@ export default function ActiveWorkoutPage() {
                       const isDone = safeNumber(cur.reps) > 0 || safeNumber(cur.weight) > 0;
 
                       return (
-                        <div key={`${order}-${i}`} className={`workout-set-row ${isDone ? "workout-set-row--done" : ""}`}>
+                        <div
+                          key={`${order}-${i}`}
+                          className={`workout-set-row ${isDone ? "workout-set-row--done" : ""}`}
+                        >
                           <div className="workout-set-cell--set">
                             <div className="workout-set-pill">{i + 1}</div>
                           </div>
 
                           {/* REPS */}
                           <div className="workout-stepper workout-stepper--reps">
-                            <button type="button" className="workout-step" onClick={() => bump(order, i, "reps", -1)} aria-label="diminuir reps">
+                            <button
+                              type="button"
+                              className="workout-step"
+                              onClick={() => bump(order, i, "reps", -1)}
+                              aria-label="diminuir reps"
+                            >
                               –
                             </button>
 
@@ -510,14 +580,24 @@ export default function ActiveWorkoutPage() {
                               onFocus={(e) => e.currentTarget.select()}
                             />
 
-                            <button type="button" className="workout-step" onClick={() => bump(order, i, "reps", +1)} aria-label="aumentar reps">
+                            <button
+                              type="button"
+                              className="workout-step"
+                              onClick={() => bump(order, i, "reps", +1)}
+                              aria-label="aumentar reps"
+                            >
                               +
                             </button>
                           </div>
 
                           {/* WEIGHT */}
                           <div className="workout-stepper workout-stepper--weight">
-                            <button type="button" className="workout-step" onClick={() => bump(order, i, "weight", -0.5)} aria-label="diminuir peso">
+                            <button
+                              type="button"
+                              className="workout-step"
+                              onClick={() => bump(order, i, "weight", -0.5)}
+                              aria-label="diminuir peso"
+                            >
                               –
                             </button>
 
@@ -532,7 +612,12 @@ export default function ActiveWorkoutPage() {
                               onFocus={(e) => e.currentTarget.select()}
                             />
 
-                            <button type="button" className="workout-step" onClick={() => bump(order, i, "weight", +0.5)} aria-label="aumentar peso">
+                            <button
+                              type="button"
+                              className="workout-step"
+                              onClick={() => bump(order, i, "weight", +0.5)}
+                              aria-label="aumentar peso"
+                            >
                               +
                             </button>
                           </div>
@@ -564,11 +649,21 @@ export default function ActiveWorkoutPage() {
       {/* FOOTER FIXO */}
       <div className="workout-footer">
         <div className="corefit-container">
-          <button className="btn-soft workout-footer-btn" type="button" onClick={() => router.push("/dashboard")} disabled={saving}>
+          <button
+            className="btn-soft workout-footer-btn"
+            type="button"
+            onClick={() => router.push("/dashboard")}
+            disabled={saving}
+          >
             Cancelar
           </button>
 
-          <button className="btn-green workout-footer-btn workout-footer-primary" type="button" onClick={finishWorkout} disabled={saving}>
+          <button
+            className="btn-green workout-footer-btn workout-footer-primary"
+            type="button"
+            onClick={finishWorkout}
+            disabled={saving}
+          >
             Finalizar ({doneSets}/{totalSets})
           </button>
         </div>

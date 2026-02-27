@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import { Activity, CalendarDays, Dumbbell } from "lucide-react";
 
+import { CFCard } from "@/components/ui/CFCard";
+
 type Workout = {
   finishedAt?: string | null;
 };
@@ -95,7 +97,7 @@ type ViewModel = {
 
 function SkeletonCard() {
   return (
-    <div className="card-dark p-4">
+    <CFCard style={{ padding: 16 }}>
       <div className="kpi-icon mb-3" />
       <div
         style={{
@@ -114,7 +116,7 @@ function SkeletonCard() {
           marginTop: 10,
         }}
       />
-    </div>
+    </CFCard>
   );
 }
 
@@ -219,17 +221,14 @@ export function StatsCards({ refreshKey }: Props) {
 
   const dayLabels = useMemo(() => ["S", "T", "Q", "Q", "S", "S", "D"], []);
 
-  // ✅ Targets seguros (mesmo quando loading/vm null)
   const weekScoreTarget = vm?.weekScorePct ?? 0;
   const weekDoneTarget = vm?.weekActiveDays ?? 0;
   const monthTarget = vm?.workoutsFinishedInMonth ?? 0;
 
-  // ✅ Hooks sempre chamados (ordem fixa)
   const pctAnim = useCountUp(weekScoreTarget, 750);
   const weekDoneAnim = useCountUp(weekDoneTarget, 750);
   const monthAnim = useCountUp(monthTarget, 800);
 
-  // Se estiver carregando ou sem vm, mostramos skeleton, mas hooks já rodaram.
   if (loading || !vm) {
     return (
       <div className="row g-4">
@@ -240,10 +239,8 @@ export function StatsCards({ refreshKey }: Props) {
     );
   }
 
-  // barra proporcional à meta
   const progressPct = clamp((vm.weekActiveDays / vm.weekGoalDays) * 100, 0, 100);
 
-  // delta seguro
   const safePrevLabel = vm.prevMonthLabel?.trim() ? vm.prevMonthLabel : "mês anterior";
   const safeDelta = Number.isFinite(vm.deltaVsPrev) ? vm.deltaVsPrev : 0;
   const deltaText = safeDelta === 0 ? "0" : safeDelta > 0 ? `+${safeDelta}` : `${safeDelta}`;
@@ -252,7 +249,7 @@ export function StatsCards({ refreshKey }: Props) {
     <div className="row g-4">
       {/* 1) ACOMPANHAMENTO */}
       <div className="col-12 col-md-4">
-        <div className="card-dark p-4">
+        <CFCard style={{ padding: 16 }}>
           <span className="kpi-icon mb-3">
             <Activity size={18} />
           </span>
@@ -291,12 +288,12 @@ export function StatsCards({ refreshKey }: Props) {
           </div>
 
           <div className="text-white/40 text-xs mt-2">presença na semana</div>
-        </div>
+        </CFCard>
       </div>
 
       {/* 2) RITMO SEMANAL */}
       <div className="col-12 col-md-4">
-        <div className="card-dark p-4">
+        <CFCard style={{ padding: 16 }}>
           <span className="kpi-icon mb-3">
             <CalendarDays size={18} />
           </span>
@@ -355,12 +352,12 @@ export function StatsCards({ refreshKey }: Props) {
           <div className="text-white mt-3" style={{ fontWeight: 800 }}>
             Meta: <span style={{ fontWeight: 900 }}>{vm.weekGoalDays}</span> dias
           </div>
-        </div>
+        </CFCard>
       </div>
 
       {/* 3) TREINOS NO MÊS */}
       <div className="col-12 col-md-4">
-        <div className="card-dark p-4">
+        <CFCard style={{ padding: 16 }}>
           <span className="kpi-icon mb-3">
             <Dumbbell size={18} />
           </span>
@@ -385,7 +382,7 @@ export function StatsCards({ refreshKey }: Props) {
               em relação a {safePrevLabel}
             </span>
           </div>
-        </div>
+        </CFCard>
       </div>
     </div>
   );

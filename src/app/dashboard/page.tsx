@@ -1,4 +1,3 @@
-// corefit-frontend/src/app/dashboard/page.tsx
 "use client";
 
 import "./dashboard.css";
@@ -55,10 +54,7 @@ function safeTimeMs(iso?: string) {
 }
 
 function normalizeName(s: any) {
-  return String(s ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
+  return String(s ?? "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 // Pega ordem por "Treino A/B/C" (estável)
@@ -75,7 +71,7 @@ function trainingOrderKey(name?: string) {
 }
 
 function sortTrainingsStable(list: Training[]) {
-  return [...list].sort((a: Training, b: Training) => {
+  return [...list].sort((a, b) => {
     const ka = trainingOrderKey(a.name);
     const kb = trainingOrderKey(b.name);
     if (ka !== kb) return ka - kb;
@@ -132,16 +128,14 @@ export default function DashboardPage() {
           const list: WorkoutApiItem[] = Array.isArray(ws)
             ? ws
             : Array.isArray((ws as any)?.items)
-              ? (ws as any).items
-              : [];
+            ? (ws as any).items
+            : [];
 
           // só finalizados MESMO
-          const finishedOnly = (list ?? []).filter(
-            (w: WorkoutApiItem) => w.status === "finished"
-          );
+          const finishedOnly = list.filter((w) => w.status === "finished");
 
           const ranked = finishedOnly
-            .map((w: WorkoutApiItem) => {
+            .map((w) => {
               const endIso = w.finishedAt ?? w.endedAt ?? w.startedAt;
               return {
                 trainingId: String(w.trainingId ?? ""),
@@ -182,32 +176,20 @@ export default function DashboardPage() {
 
     // 1) tenta achar pelo trainingId do workout
     if (lastFinished.trainingId) {
-      const idx = trainings.findIndex(
-        (t: Training) => pickId(t) === lastFinished.trainingId
-      );
+      const idx = trainings.findIndex((t) => pickId(t) === lastFinished.trainingId);
       if (idx >= 0) return trainings[(idx + 1) % trainings.length] ?? trainings[0];
     }
 
     // 2) fallback: tenta achar pelo trainingName (normalizado)
     if (lastFinished.trainingName) {
       const lastName = normalizeName(lastFinished.trainingName);
-      const idxByName = trainings.findIndex(
-        (t: Training) => normalizeName(t.name) === lastName
-      );
+      const idxByName = trainings.findIndex((t) => normalizeName(t.name) === lastName);
       if (idxByName >= 0) return trainings[(idxByName + 1) % trainings.length] ?? trainings[0];
-    }
-
-    // 3) fallback final: pega o próximo pela “ordem” A/B/C (pela letra do treino)
-    if (lastFinished.trainingName) {
-      const lastKey = trainingOrderKey(lastFinished.trainingName);
-      const sorted = trainings; // já ordenado
-      const next = sorted.find((t) => trainingOrderKey(t.name) > lastKey);
-      return next ?? sorted[0];
     }
 
     // default
     return trainings[0];
-  }, [trainings, lastFinished.trainingId, lastFinished.trainingName]);
+  }, [trainings, lastFinished]);
 
   const heroData = useMemo(() => {
     const t = nextTraining;

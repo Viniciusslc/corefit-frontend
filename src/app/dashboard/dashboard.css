@@ -1187,3 +1187,61 @@
 .volume-badge:hover {
   box-shadow: 0 0 22px rgba(34, 197, 94, 0.55);
 }
+
+.card-hero::before,
+.card-hero::after {
+  pointer-events: none;
+}
+
+.card-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-hero::before,
+.card-hero::after {
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-green {
+  position: relative;
+  z-index: 2;
+}
+
+.corefit-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 99999;
+}
+
+.corefit-brand {
+  position: relative;
+  z-index: 100000;
+  pointer-events: auto;
+}
+
+.corefit-topbar * {
+  pointer-events: auto;
+}
+
+.glow-green::before,
+.glow-green::after,
+.card-hero::before,
+.card-hero::after {
+  pointer-events: none;
+}
+.card-hero::before,
+.card-hero::after {
+  pointer-events: none;
+}
+
+.workout-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}

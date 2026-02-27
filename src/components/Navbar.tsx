@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Dumbbell, LogOut } from "lucide-react";
 
 const publicNav = [
@@ -41,9 +41,9 @@ export default function Navbar() {
     <header className="corefit-topbar">
       <div className="corefit-container">
         <div className="corefit-topbar-inner">
-          {/* Logo */}
+          {/* LOGO */}
           <Link
-            href="/"
+            href={logged ? "/dashboard" : "/"}
             className="corefit-brand"
             style={{ textDecoration: "none", color: "inherit" }}
           >
