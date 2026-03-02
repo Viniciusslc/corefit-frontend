@@ -211,8 +211,8 @@ export default function DashboardPage() {
   }, [nextTraining]);
 
   return (
-    <div className="corefit-bg">
-      <div className="corefit-container" style={{ paddingTop: 96, paddingBottom: 40 }}>
+    <div className="corefit-bg dashboard-page">
+      <div className="corefit-container dashboard-container">
         {loading ? (
           <div className="card-dark p-4">Carregando dashboard…</div>
         ) : (

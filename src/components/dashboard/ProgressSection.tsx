@@ -239,13 +239,14 @@ export function ProgressSection({ refreshKey }: Props) {
             </div>
           </div>
 
-          {/* Gráfico (premium: limpo + badge discreto) */}
-          <div style={{ marginTop: 14 }}>
+          {/* Gráfico (desktop continua grid; mobile vira scroll via CSS) */}
+          <div className="progress-mobile-scroll" style={{ marginTop: 14 }}>
             <div className="text-muted-soft" style={{ fontSize: 12, marginBottom: 8 }}>
               Volume por dia (seg → dom)
             </div>
 
             <div
+              className="progress-bars"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
@@ -264,6 +265,7 @@ export function ProgressSection({ refreshKey }: Props) {
                 return (
                   <div
                     key={d.dayKey}
+                    className="progress-day"
                     style={{
                       display: "flex",
                       flexDirection: "column",
@@ -292,7 +294,7 @@ export function ProgressSection({ refreshKey }: Props) {
                         overflow: "hidden",
                       }}
                     >
-                      {/* ✅ badge premium */}
+                      {/* badge premium */}
                       {hasVolume && (
                         <div className="volume-badge">
                           {d.volume.toLocaleString("pt-BR")}

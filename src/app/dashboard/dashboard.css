@@ -1245,3 +1245,296 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
+
+/* =========================================
+   OPÇÃO 4 — MOBILE APP MODE (sem quebrar desktop)
+   Escopo: só no Dashboard
+========================================= */
+
+.dashboard-container {
+  padding-top: 96px;
+  padding-bottom: 40px;
+}
+
+/* altura real do topbar no seu CSS é 60px, então no mobile reduz */
+@media (max-width: 640px) {
+  .dashboard-container {
+    padding-top: 74px; /* 60px topbar + respiro */
+    padding-bottom: 24px;
+  }
+
+  /* No mobile, container vira “app width” */
+  .dashboard-page .corefit-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  /* Cards mais “app”: menos sombra pesada, mais borda suave */
+  .dashboard-page .card-dark {
+    border-radius: 22px;
+    padding: 16px;
+    box-shadow:
+      0 14px 34px rgba(0, 0, 0, 0.38),
+      0 0 0 1px rgba(255,255,255,0.05) inset;
+  }
+
+  /* Hero card mais “app”, com respiro e tipografia */
+  .dashboard-page .card-hero {
+    border-radius: 26px;
+  }
+
+  .dashboard-page .hero-title {
+    font-size: 20px;
+    line-height: 1.15;
+  }
+
+  .dashboard-page .hero-meta {
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  /* KPIs: mantém 1 coluna (mais app), e aumenta a área de toque */
+  .dashboard-page .stats-row,
+  .dashboard-page .history-summary {
+    gap: 12px;
+  }
+
+  /* ProgressSection vira “carrossel” no mobile (app feel) */
+  .dashboard-page .progress-mobile-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+  }
+
+  .dashboard-page .progress-mobile-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  .dashboard-page .progress-mobile-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.10);
+    border-radius: 999px;
+  }
+
+  /* barras maiores e cards por dia com largura fixa */
+  .dashboard-page .progress-bars {
+    display: flex !important;
+    gap: 10px !important;
+    align-items: flex-end !important;
+    min-width: max-content;
+  }
+
+  .dashboard-page .progress-bars .progress-day {
+    width: 74px; /* largura fixa por dia */
+  }
+
+  /* Melhor leitura dos KPIs do progresso */
+  .dashboard-page .history-summary-card {
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  /* Lista de treinos: card mais “tap friendly” */
+  .dashboard-page .list-row,
+  .dashboard-page .workout-row,
+  .dashboard-page .qa-tile,
+  .dashboard-page .quick-tile,
+  .dashboard-page .quick-card,
+  .dashboard-page .qa-tile {
+    border-radius: 18px;
+  }
+
+  .dashboard-page .qa-tile,
+  .dashboard-page .quick-tile {
+    padding: 16px;
+  }
+
+  /* Ações rápidas no mobile: 1 coluna (limpo) */
+  .dashboard-page .qa-grid,
+  .dashboard-page .quick-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Espaço entre seções mais “feed” */
+  .dashboard-page .dashboard-stack {
+    gap: 14px;
+  }
+
+  /* Desliga hover lift no mobile (já tinha, reforçando) */
+  .dashboard-page .card-dark:hover {
+    transform: none;
+  }
+
+  /* Navbar: deixa o botão “Entrar/Sair” mais compacto no mobile */
+  .corefit-topbar-inner {
+    height: 56px;
+  }
+
+  .corefit-brand span {
+    font-size: 14px;
+  }
+
+  .corefit-topbar .btn-soft {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+    border-radius: 12px;
+  }
+}
+@media (max-width: 640px) {
+
+  .dashboard-page .qa-tile {
+    padding: 18px !important;
+    border-radius: 20px !important;
+  }
+
+  .dashboard-page .qa-ic {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 14px !important;
+  }
+
+  .dashboard-page .qa-tx b {
+    font-size: 14px;
+  }
+
+  .dashboard-page .qa-tx span {
+    font-size: 12px;
+  }
+
+}
+
+/* ===== QuickActions row style (novo, sem conflito) ===== */
+.qa-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.qa-row {
+  width: 100%;
+  text-align: left;
+  border-radius: 18px;
+  padding: 14px 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: rgba(229,231,235,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all .15s ease;
+}
+
+.qa-row:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.qa-row:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.qa-row--primary {
+  background: rgba(34,197,94,0.16);
+  border-color: rgba(34,197,94,0.22);
+}
+
+.qa-row--primary:hover {
+  background: rgba(34,197,94,0.20);
+  border-color: rgba(34,197,94,0.30);
+}
+
+.qa-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.qa-row-ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.qa-row--primary .qa-row-ic {
+  background: rgba(0,0,0,0.18);
+  border-color: rgba(0,0,0,0.18);
+  color: rgba(3,21,10,0.92);
+}
+
+.qa-row-txt {
+  min-width: 0;
+}
+
+.qa-row-title {
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 16px;
+}
+
+.qa-row-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(229,231,235,0.60);
+  line-height: 14px;
+}
+
+.qa-row-right {
+  color: rgba(229,231,235,0.55);
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .qa-row {
+    border-radius: 20px;
+    padding: 16px;
+  }
+  .qa-row-ic {
+    width: 42px;
+    height: 42px;
+    border-radius: 16px;
+  }
+}
+
+/* ===== LOGIN / AUTH (escopado) ===== */
+.auth-page {
+  min-height: 100vh;
+}
+
+.auth-wrap {
+  min-height: calc(100vh - 64px);
+  padding: 96px 14px 28px;
+  display: grid;
+  place-items: center;
+  gap: 14px;
+}
+
+.auth-card {
+  width: min(420px, 92vw);
+  text-align: center;
+  border-radius: 22px;
+  padding: 18px;
+}
+
+.auth-card .btn-green {
+  width: 100%;
+  height: 46px;
+  border-radius: 14px;
+  font-weight: 900;
+}
+
+.auth-footer {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(229,231,235,0.45);
+}

@@ -1,16 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { RefreshCcw, PencilLine, Sparkles, TrendingUp } from "lucide-react";
-
-import { CFCard } from "@/components/ui/CFCard";
-import { CFButton } from "@/components/ui/CFButton";
+import { RefreshCcw, PencilLine, Sparkles, TrendingUp, ChevronRight } from "lucide-react";
 
 export function QuickActions() {
   const router = useRouter();
 
   return (
-    <CFCard>
+    <div className="card-dark">
       <div className="section-head">
         <div className="section-head-left">
           <span className="section-icon">
@@ -18,77 +15,84 @@ export function QuickActions() {
           </span>
           <div>
             <div className="section-title">Ações rápidas</div>
-            <div
-              className="text-muted-soft"
-              style={{ fontSize: 12, marginTop: 2 }}
-            >
-              Atalhos para acelerar sua evolução.
-            </div>
+            <div className="text-muted-soft">Atalhos para acelerar sua evolução.</div>
           </div>
         </div>
       </div>
 
-      <div className="qa-grid">
-        {/* Novo ciclo */}
-        <CFButton
-          variant="primary"
-          onClick={() => router.push("/trainings?newCycle=1")}
-          className="qa-tile"
-        >
-          <div className="qa-ic">
-            <RefreshCcw size={16} />
-          </div>
-          <div className="qa-tx">
-            <b>Novo ciclo</b>
-            <span>Iniciar novo plano</span>
-          </div>
-        </CFButton>
-
-        {/* Editar treino */}
-        <CFButton
-          variant="soft"
+      <div className="qa-rows">
+        <button
+          type="button"
+          className="qa-row qa-row--primary"
           onClick={() => router.push("/trainings")}
-          className="qa-tile"
         >
-          <div className="qa-ic">
-            <PencilLine size={16} />
+          <div className="qa-row-left">
+            <span className="qa-row-ic">
+              <RefreshCcw size={16} />
+            </span>
+            <div className="qa-row-txt">
+              <div className="qa-row-title">Novo ciclo</div>
+              <div className="qa-row-sub">Iniciar novo plano</div>
+            </div>
           </div>
-          <div className="qa-tx">
-            <b>Editar treino</b>
-            <span>Ajustar exercícios</span>
-          </div>
-        </CFButton>
+          <span className="qa-row-right">
+            <ChevronRight size={18} />
+          </span>
+        </button>
 
-        {/* IA Coach */}
-        <CFButton
-          variant="soft"
-          onClick={() => router.push("/ai-coach")}
-          className="qa-tile"
+        <button
+          type="button"
+          className="qa-row"
+          onClick={() => router.push("/trainings")}
         >
-          <div className="qa-ic">
-            <Sparkles size={16} />
+          <div className="qa-row-left">
+            <span className="qa-row-ic">
+              <PencilLine size={16} />
+            </span>
+            <div className="qa-row-txt">
+              <div className="qa-row-title">Editar treino</div>
+              <div className="qa-row-sub">Ajustar exercícios</div>
+            </div>
           </div>
-          <div className="qa-tx">
-            <b>IA Coach</b>
-            <span>Em construção</span>
-          </div>
-        </CFButton>
+          <span className="qa-row-right">
+            <ChevronRight size={18} />
+          </span>
+        </button>
 
-        {/* Progresso */}
-        <CFButton
-          variant="soft"
+        <button type="button" className="qa-row" disabled>
+          <div className="qa-row-left">
+            <span className="qa-row-ic">
+              <Sparkles size={16} />
+            </span>
+            <div className="qa-row-txt">
+              <div className="qa-row-title">IA Coach</div>
+              <div className="qa-row-sub">Em construção</div>
+            </div>
+          </div>
+          <span className="qa-row-right">
+            <ChevronRight size={18} />
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className="qa-row"
           onClick={() => router.push("/workouts")}
-          className="qa-tile"
         >
-          <div className="qa-ic">
-            <TrendingUp size={16} />
+          <div className="qa-row-left">
+            <span className="qa-row-ic">
+              <TrendingUp size={16} />
+            </span>
+            <div className="qa-row-txt">
+              <div className="qa-row-title">Progresso</div>
+              <div className="qa-row-sub">Ver evolução</div>
+            </div>
           </div>
-          <div className="qa-tx">
-            <b>Progresso</b>
-            <span>Ver evolução</span>
-          </div>
-        </CFButton>
+          <span className="qa-row-right">
+            <ChevronRight size={18} />
+          </span>
+        </button>
       </div>
-    </CFCard>
+    </div>
   );
 }
