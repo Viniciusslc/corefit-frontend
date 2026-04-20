@@ -1,24 +1,24 @@
 "use client";
 
+import "../workouts.css";
+
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { ArrowLeft, CalendarDays, Clock3, History } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { apiFetch } from "@/lib/apiFetch";
 
 type WorkoutDetail = {
   id?: string;
   _id?: string;
-
   trainingName?: string;
   trainingId?: string;
-
   status?: "active" | "finished";
-
-  startedAt?: string;   // ISO
-  finishedAt?: string;  // ISO
-  endedAt?: string;     // ISO
-
+  startedAt?: string;
+  finishedAt?: string;
+  endedAt?: string;
   performedExercises?: {
     exerciseName: string;
     order: number;
@@ -27,46 +27,42 @@ type WorkoutDetail = {
   }[];
 };
 
-function pickId(w: WorkoutDetail) {
-  return String(w.id ?? w._id ?? "");
-}
-
-function safeNumber(n: any) {
-  const x = Number(n);
-  return Number.isFinite(x) ? x : 0;
+function safeNumber(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function formatDateTimeBR(iso?: string) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString("pt-BR");
+  if (!iso) return "-";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString("pt-BR");
 }
 
 function formatMinutesFromDates(start?: string, end?: string) {
-  if (!start || !end) return "Duração: —";
-  const a = new Date(start).getTime();
-  const b = new Date(end).getTime();
-  if (!Number.isFinite(a) || !Number.isFinite(b) || b <= a) return "Duração: —";
-  const mins = Math.round((b - a) / 60000);
-  return `Duração: ${mins} min`;
+  if (!start || !end) return "Duracao: -";
+  const startMs = new Date(start).getTime();
+  const endMs = new Date(end).getTime();
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) {
+    return "Duracao: -";
+  }
+  const mins = Math.round((endMs - startMs) / 60000);
+  return `Duracao: ${mins} min`;
 }
 
 function computeSummary(performed?: WorkoutDetail["performedExercises"]) {
-  const exs = performed ?? [];
   let sets = 0;
   let reps = 0;
   let volume = 0;
 
-  for (const ex of exs) {
-    const arr = ex.setsPerformed ?? [];
-    for (const s of arr) {
-      const r = safeNumber(s.reps);
-      const w = safeNumber(s.weight);
-      if (r > 0 || w > 0) {
+  for (const exercise of performed ?? []) {
+    for (const set of exercise.setsPerformed ?? []) {
+      const repsValue = safeNumber(set.reps);
+      const weightValue = safeNumber(set.weight);
+      if (repsValue > 0 || weightValue > 0) {
         sets += 1;
-        reps += r;
-        volume += r * w;
+        reps += repsValue;
+        volume += repsValue * weightValue;
       }
     }
   }
@@ -100,10 +96,11 @@ export default function WorkoutDetailPage() {
       setError(null);
 
       try {
-        const w = await apiFetch<WorkoutDetail>(`/workouts/${workoutId}`);
-        setData(w);
-      } catch (e: any) {
-        setError(e?.message ?? "Erro ao carregar treino");
+        const workout = await apiFetch<WorkoutDetail>(`/workouts/${workoutId}`);
+        setData(workout);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Erro ao carregar treino";
+        setError(message);
         setData(null);
       } finally {
         setLoading(false);
@@ -125,38 +122,45 @@ export default function WorkoutDetailPage() {
 
   return (
     <main className="corefit-bg">
-      <div className="corefit-container" style={{ paddingTop: 84, paddingBottom: 36 }}>
-        {/* Header */}
-        <div className="history-header">
+      <div className="corefit-container" style={{ paddingTop: 92, paddingBottom: 36 }}>
+        <div className="history-header card-dark" style={{ marginBottom: 16 }}>
           <div className="history-titlewrap">
-            <div className="history-icon">⟲</div>
+            <div className="history-icon">
+              <History size={18} />
+            </div>
             <div>
               <div className="history-title">Detalhe do treino</div>
               <div className="history-subtitle">
-                {data?.trainingName ?? "Treino"} • {end ? "Finalizado" : "Em andamento"}
+                {data?.trainingName ?? "Treino"} / {end ? "Finalizado" : "Em andamento"}
               </div>
             </div>
           </div>
 
           <button className="history-filter" type="button" onClick={() => router.back()}>
-            Voltar
+            <span className="d-inline-flex align-items-center gap-2">
+              <ArrowLeft size={14} />
+              Voltar
+            </span>
           </button>
         </div>
 
-        {/* Meta info */}
         <div className="card-dark" style={{ marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
             <div>
               <div style={{ fontWeight: 900, fontSize: 18 }}>{data?.trainingName ?? "Treino"}</div>
-              <div className="text-muted-soft" style={{ marginTop: 6 }}>
-                <span className="history-meta-dot">•</span>{" "}
-                Início: {formatDateTimeBR(data?.startedAt)}
-                <br />
-                <span className="history-meta-dot">•</span>{" "}
-                Fim: {formatDateTimeBR(end)}
-                <br />
-                <span className="history-meta-dot">•</span>{" "}
-                {formatMinutesFromDates(data?.startedAt, end)}
+              <div className="text-muted-soft" style={{ marginTop: 8, display: "grid", gap: 8 }}>
+                <div className="d-inline-flex align-items-center gap-2">
+                  <CalendarDays size={12} />
+                  Inicio: {formatDateTimeBR(data?.startedAt)}
+                </div>
+                <div className="d-inline-flex align-items-center gap-2">
+                  <CalendarDays size={12} />
+                  Fim: {formatDateTimeBR(end)}
+                </div>
+                <div className="d-inline-flex align-items-center gap-2">
+                  <Clock3 size={12} />
+                  {formatMinutesFromDates(data?.startedAt, end)}
+                </div>
               </div>
             </div>
 
@@ -164,16 +168,15 @@ export default function WorkoutDetailPage() {
               {summary.executed ? (
                 <div className="history-chip history-chip--ok">Executado</div>
               ) : (
-                <div className="history-chip">Sem execução</div>
+                <div className="history-chip">Sem execucao</div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Resumo (Sprint 1) */}
         <div className="history-summary" style={{ marginBottom: 18 }}>
           <div className="history-summary-card">
-            <div className="history-summary-label">Séries totais</div>
+            <div className="history-summary-label">Series totais</div>
             <div className="history-summary-value">{summary.setsTotal}</div>
           </div>
 
@@ -184,60 +187,58 @@ export default function WorkoutDetailPage() {
 
           <div className="history-summary-card">
             <div className="history-summary-label">Volume total</div>
-            <div className="history-summary-value">
-              {summary.volumeTotal.toLocaleString("pt-BR")} kg
-            </div>
+            <div className="history-summary-value">{summary.volumeTotal.toLocaleString("pt-BR")} kg</div>
           </div>
         </div>
 
-        {/* Planejado vs Executado (versão 1: usando targetWeight como “meta”) */}
-        <div className="history-section-label">Planejado vs Executado</div>
+        <div className="history-section-label">Planejado vs executado</div>
 
-        {loading && <div className="card-dark">Carregando...</div>}
+        {loading ? <div className="card-dark">Carregando...</div> : null}
 
-        {!loading && error && (
+        {!loading && error ? (
           <div className="card-dark" style={{ borderColor: "rgba(239,68,68,0.35)" }}>
             <div style={{ fontWeight: 900, marginBottom: 6 }}>Erro</div>
             <div className="text-muted-soft">{error}</div>
           </div>
-        )}
+        ) : null}
 
-        {!loading && !error && !data && (
+        {!loading && !error && !data ? (
           <div className="card-dark">
-            <div style={{ fontWeight: 900, marginBottom: 6 }}>Não encontrado</div>
-            <div className="text-muted-soft">Esse treino não existe ou você não tem acesso.</div>
+            <div style={{ fontWeight: 900, marginBottom: 6 }}>Nao encontrado</div>
+            <div className="text-muted-soft">Esse treino nao existe ou voce nao tem acesso.</div>
           </div>
-        )}
+        ) : null}
 
-        {!loading && !error && data && exercises.length === 0 && (
+        {!loading && !error && data && exercises.length === 0 ? (
           <div className="card-dark">
-            <div style={{ fontWeight: 900, marginBottom: 6 }}>Sem exercícios</div>
-            <div className="text-muted-soft">Não há execução registrada nesse treino.</div>
+            <div style={{ fontWeight: 900, marginBottom: 6 }}>Sem exercicios</div>
+            <div className="text-muted-soft">Nao ha execucao registrada nesse treino.</div>
           </div>
-        )}
+        ) : null}
 
-        {!loading && !error && data && exercises.length > 0 && (
+        {!loading && !error && data && exercises.length > 0 ? (
           <div className="history-list">
-            {exercises.map((ex) => {
-              const sets = (ex.setsPerformed ?? []).filter(
-                (s) => safeNumber(s.reps) > 0 || safeNumber(s.weight) > 0
+            {exercises.map((exercise) => {
+              const sets = (exercise.setsPerformed ?? []).filter(
+                (set) => safeNumber(set.reps) > 0 || safeNumber(set.weight) > 0,
               );
 
-              // estatísticas por exercício
-              const exSets = sets.length;
-              const exReps = sets.reduce((acc, s) => acc + safeNumber(s.reps), 0);
-              const exVol = Math.round(sets.reduce((acc, s) => acc + safeNumber(s.reps) * safeNumber(s.weight), 0));
+              const exerciseSets = sets.length;
+              const exerciseReps = sets.reduce((acc, set) => acc + safeNumber(set.reps), 0);
+              const exerciseVolume = Math.round(
+                sets.reduce((acc, set) => acc + safeNumber(set.reps) * safeNumber(set.weight), 0),
+              );
 
               return (
-                <div key={`${ex.order}-${ex.exerciseName}`} className="history-card">
+                <div key={`${exercise.order}-${exercise.exerciseName}`} className="history-card">
                   <div className="history-card-head">
                     <div className="history-card-title">
-                      <span style={{ opacity: 0.6, marginRight: 8 }}>#{ex.order + 1}</span>
-                      {ex.exerciseName}
+                      <span style={{ opacity: 0.6, marginRight: 8 }}>#{safeNumber(exercise.order) + 1}</span>
+                      {exercise.exerciseName}
                     </div>
 
-                    {typeof ex.targetWeight === "number" ? (
-                      <div className="history-chip history-chip--ok">Meta: {ex.targetWeight}kg</div>
+                    {typeof exercise.targetWeight === "number" ? (
+                      <div className="history-chip history-chip--ok">Meta: {exercise.targetWeight}kg</div>
                     ) : (
                       <div className="history-chip">Sem meta</div>
                     )}
@@ -245,30 +246,30 @@ export default function WorkoutDetailPage() {
 
                   <div className="history-stats" style={{ marginTop: 12 }}>
                     <div className="history-stat">
-                      <div className="history-stat-label">Séries</div>
-                      <div className="history-stat-value">{exSets || "-"}</div>
+                      <div className="history-stat-label">Series</div>
+                      <div className="history-stat-value">{exerciseSets || "-"}</div>
                     </div>
 
                     <div className="history-stat">
                       <div className="history-stat-label">Reps</div>
-                      <div className="history-stat-value">{exReps || "-"}</div>
+                      <div className="history-stat-value">{exerciseReps || "-"}</div>
                     </div>
 
                     <div className="history-stat">
                       <div className="history-stat-label">Volume</div>
                       <div className="history-stat-value">
-                        {exSets ? `${exVol.toLocaleString("pt-BR")} kg` : "-"}
+                        {exerciseSets ? `${exerciseVolume.toLocaleString("pt-BR")} kg` : "-"}
                       </div>
                     </div>
                   </div>
 
                   <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
                     {sets.length === 0 ? (
-                      <div className="text-muted-soft">Sem execução registrada.</div>
+                      <div className="text-muted-soft">Sem execucao registrada.</div>
                     ) : (
-                      sets.map((s, idx) => (
+                      sets.map((set, index) => (
                         <div
-                          key={idx}
+                          key={`${exercise.exerciseName}-${index}`}
                           className="card-dark"
                           style={{
                             padding: "10px 12px",
@@ -277,19 +278,20 @@ export default function WorkoutDetailPage() {
                           }}
                         >
                           <div style={{ fontWeight: 900 }}>
-                            Série {idx + 1}
-                            <span style={{ opacity: 0.45, margin: "0 8px" }}>•</span>
-                            {safeNumber(s.reps)} reps
-                            <span style={{ opacity: 0.45, margin: "0 8px" }}>•</span>
-                            {safeNumber(s.weight)} kg
+                            Serie {index + 1}
+                            <span style={{ opacity: 0.45, margin: "0 8px" }}>/</span>
+                            {safeNumber(set.reps)} reps
+                            <span style={{ opacity: 0.45, margin: "0 8px" }}>/</span>
+                            {safeNumber(set.weight)} kg
                           </div>
 
-                          {/* indicador simples “meta vs feito” quando tiver meta */}
-                          {typeof ex.targetWeight === "number" && (
+                          {typeof exercise.targetWeight === "number" ? (
                             <div className="text-muted-soft" style={{ marginTop: 4 }}>
-                              {safeNumber(s.weight) >= ex.targetWeight ? "✅ Acima/Bateu a meta" : "⬆️ Abaixo da meta"}
+                              {safeNumber(set.weight) >= exercise.targetWeight
+                                ? "Meta atingida ou superada"
+                                : "Abaixo da meta"}
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       ))
                     )}
@@ -297,14 +299,17 @@ export default function WorkoutDetailPage() {
 
                   <div className="history-actions" style={{ marginTop: 14 }}>
                     <Link className="history-link" href="/workouts">
-                      Voltar pro histórico <span className="history-arrow">›</span>
+                      <span className="d-inline-flex align-items-center gap-2">
+                        <ArrowLeft size={14} />
+                        Voltar para o historico
+                      </span>
                     </Link>
                   </div>
                 </div>
               );
             })}
           </div>
-        )}
+        ) : null}
       </div>
     </main>
   );

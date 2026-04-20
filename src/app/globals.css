@@ -1,187 +1,206 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
 
-
-/* ===========================
-   GLOBAL THEME (Corefit)
-=========================== */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  /* ===== Corefit Tokens ===== */
+  --background: #050505;
+  --foreground: #ffffff;
 
-  /* cores base */
   --cf-bg: #050505;
   --cf-surface: rgba(17, 17, 17, 0.86);
-  --cf-surface-2: rgba(255, 255, 255, 0.04);
-
   --cf-border: rgba(255, 255, 255, 0.08);
   --cf-border-strong: rgba(255, 255, 255, 0.14);
-
   --cf-text: rgba(229, 231, 235, 0.96);
-  --cf-muted: rgba(229, 231, 235, 0.72);
-  --cf-muted-2: rgba(229, 231, 235, 0.56);
-
-  /* brand */
+  --cf-muted: rgba(229, 231, 235, 0.65);
   --cf-green: #22c55e;
-  --cf-green-2: rgba(34, 197, 94, 0.18);
+  --cf-green-soft: rgba(34, 197, 94, 0.18);
   --cf-green-border: rgba(34, 197, 94, 0.28);
-
-  /* estados */
-  --cf-danger: #ef4444;
-  --cf-danger-bg: rgba(239, 68, 68, 0.14);
-  --cf-warn: #f59e0b;
-  --cf-info: #38bdf8;
-
-  /* radius */
-  --cf-radius-sm: 10px;
-  --cf-radius-md: 16px;
-  --cf-radius-lg: 20px;
-
-  /* sombras */
-  --cf-shadow-sm: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --cf-shadow-md: 0 14px 40px rgba(0, 0, 0, 0.45);
-
-  /* foco */
   --cf-ring: 0 0 0 3px rgba(34, 197, 94, 0.22);
-
-  /* motion */
-  --cf-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --cf-fast: 160ms;
-  --cf-normal: 220ms;
-
-  /* layout */
-  --cf-container: 1120px;
-}
-
-:root {
-  --background: 0 0% 5%;
-  --foreground: 0 0% 95%;
 }
 
 html,
 body {
-  height: 100%;
-  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", sans-serif;
 }
 
 body {
-  background: #050505;
-  color: #e5e7eb;
+  overflow-x: hidden;
 }
 
-/* =========================
-   Corefit BG (igual dashboard)
-========================= */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.d-inline-flex {
+  display: inline-flex;
+}
+
+.d-none {
+  display: none;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.align-items-start {
+  align-items: flex-start;
+}
+
+.align-items-end {
+  align-items: flex-end;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.justify-content-end {
+  justify-content: flex-end;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 1rem;
+}
+
+.gap-4 {
+  gap: 1.5rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.mt-4 {
+  margin-top: 1.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+
+.py-3 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.text-decoration-none {
+  text-decoration: none;
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
+@media (min-width: 576px) {
+  .flex-sm-row {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 768px) {
+  .d-md-flex {
+    display: flex;
+  }
+
+  .d-md-inline-flex {
+    display: inline-flex;
+  }
+
+  .d-md-none {
+    display: none;
+  }
+}
+
 .corefit-bg {
   color: var(--cf-text);
   background:
     radial-gradient(900px 350px at 25% 0, rgba(34, 197, 94, 0.16), transparent 55%),
-    radial-gradient(700px 300px at 70% 15%, rgba(34, 197, 94, 0.10), transparent 60%),
+    radial-gradient(700px 300px at 70% 15%, rgba(34, 197, 94, 0.1), transparent 60%),
     var(--cf-bg);
   min-height: 100vh;
 }
 
-/* Container padrão */
 .corefit-container {
   width: min(1100px, 92vw);
   margin: 0 auto;
   padding: 0 16px;
 }
 
-/* =========================
-   Topbar (estilo app)
-========================= */
-.corefit-topbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  backdrop-filter: blur(12px);
-  background: rgba(0, 0, 0, 0.55);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.corefit-topbar-inner {
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.corefit-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 900;
-  letter-spacing: 0.6px;
-}
-
-.corefit-logo {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  background: rgba(34, 197, 94, 0.18);
-  border: 1px solid rgba(34, 197, 94, 0.30);
-  display: grid;
-  place-items: center;
-  color: #22c55e;
-  font-size: 14px;
-}
-
-.corefit-nav {
-  display: flex;
-  gap: 18px;
-  font-size: 13px;
-  color: rgba(229, 231, 235, 0.72);
-}
-
-.corefit-nav a {
-  color: inherit;
-  text-decoration: none;
-  padding: 6px 8px;
-  border-radius: 10px;
-}
-
-.corefit-nav a:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(229, 231, 235, 0.9);
-}
-
-/* no mobile, some o menu pra não “sair do quadro” */
-@media (max-width: 640px) {
-  .corefit-nav {
-    display: none;
-  }
-}
-
-/* =========================
-   Cards / botões / inputs (estilo app)
-========================= */
 .card-dark {
-  background: rgba(17, 17, 17, 0.86);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
   border-radius: 18px;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
   padding: 1.5rem;
 }
 
 .glow-green {
-  box-shadow: 0 0 0 1px rgba(34,197,94,0.18),
-    0 0 38px rgba(34,197,94,0.10),
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.18),
+    0 0 38px rgba(34, 197, 94, 0.1),
     0 14px 40px rgba(0, 0, 0, 0.45);
 }
 
 .text-muted-soft {
-  color: rgba(229, 231, 235, 0.65);
+  color: var(--cf-muted);
 }
 
 .btn-green {
-  background: #22c55e;
+  background: var(--cf-green);
   border: none;
   color: #03150a;
   font-weight: 900;
   border-radius: 12px;
 }
+
 .btn-green:hover {
   background: #16a34a;
   color: #03150a;
@@ -189,677 +208,34 @@ body {
 
 .btn-soft {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #e5e7eb;
   border-radius: 12px;
   font-weight: 800;
 }
+
 .btn-soft:hover {
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.1);
   color: #e5e7eb;
 }
 
 .input-dark {
   width: 100%;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #e5e7eb;
   border-radius: 12px;
   padding: 0.75rem 0.9rem;
   outline: none;
 }
+
 .input-dark:focus {
   border-color: rgba(34, 197, 94, 0.35);
   box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25), 0 0 24px rgba(34, 197, 94, 0.14);
 }
 
-/* ✅ Shield leve (Bootstrap não interferir dentro do tema) */
-.corefit-bg button { font: inherit; }
-.corefit-bg input { font: inherit; }
-/* ✅ importante pro treino (textarea no form) */
-.corefit-bg textarea { font: inherit; }
-
-/* =========================
-   Hero animation (Corefit)
-========================= */
-.hero-animate {
-  opacity: 0;
-  transform: translateY(12px);
-  animation: heroFadeUp 0.6s ease-out forwards;
-}
-
-.hero-delay-1 { animation-delay: 0.05s; }
-.hero-delay-2 { animation-delay: 0.15s; }
-.hero-delay-3 { animation-delay: 0.25s; }
-.hero-delay-4 { animation-delay: 0.35s; }
-
-@keyframes heroFadeUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* =========================
-   Register highlights
-========================= */
-.register-title {
-  color: #22c55e;
-}
-
-.register-label {
-  color: rgba(34, 197, 94, 0.85);
-  font-weight: 600;
-}
-
-.register-label small {
-  color: rgba(34, 197, 94, 0.55);
-  font-weight: 500;
-}
-
-/* =========================================================
-   Workout Active UI (print 1)
-========================================================= */
-
-/* (mantive TUDO como você colou) */
-
-.workout-page { position: relative; }
-
-.workout-top {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 14px;
-  margin: 10px 0 14px;
-}
-
-.workout-top-left { flex: 1; min-width: 0; }
-
-.workout-top-label {
-  font-size: 12px;
-  color: rgba(229,231,235,0.55);
-  margin-bottom: 8px;
-}
-
-.workout-progress {
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
-  overflow: hidden;
-}
-
-.workout-progress-bar {
-  height: 100%;
-  border-radius: 999px;
-  background: rgba(34,197,94,0.65);
-  box-shadow: 0 0 18px rgba(34,197,94,0.25);
-}
-
-.workout-top-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.workout-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(229,231,235,0.85);
-}
-
-.workout-chip-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(34,197,94,0.95);
-  box-shadow: 0 0 14px rgba(34,197,94,0.35);
-}
-
-.workout-chip-dot--amber {
-  background: rgba(245,158,11,0.95);
-  box-shadow: 0 0 14px rgba(245,158,11,0.25);
-}
-
-.workout-link {
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-weight: 900;
-  font-size: 12px;
-  letter-spacing: -0.2px;
-  background: transparent;
-  border: 1px solid rgba(34,197,94,0.30);
-  color: rgba(134,239,172,0.95);
-}
-.workout-link:hover { background: rgba(34,197,94,0.10); }
-.workout-link:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.workout-hero { margin-bottom: 14px; }
-
-.workout-hero-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.workout-hero-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-/* ✅ aqui é onde você tinha o “TREINO” saindo pra fora.
-   Mantive como estava, mas isso já segura.
-   Se quiser “não redondinho”, troca no JSX pra usar uma pill. */
-.workout-hero-badge {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: rgba(34,197,94,0.16);
-  border: 1px solid rgba(34,197,94,0.28);
-  color: rgba(134,239,172,0.95);
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.workout-hero-name {
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: -0.3px;
-  color: rgba(255,255,255,0.96);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.workout-hero-sub { margin-top: 2px; font-size: 12px; }
-.workout-save { font-size: 12px; flex-shrink: 0; }
-
-.workout-list { display: flex; flex-direction: column; gap: 10px; }
-
-.workout-ex-card {
-  border-radius: 16px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  overflow: hidden;
-}
-
-.workout-ex-card--open {
-  border-color: rgba(34,197,94,0.22);
-  box-shadow: 0 0 0 1px rgba(34,197,94,0.12), 0 12px 34px rgba(0,0,0,0.28);
-}
-
-.workout-ex-head {
-  width: 100%;
-  background: transparent;
-  border: none;
-  color: inherit;
-  padding: 14px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  text-align: left;
-}
-
-.workout-ex-head:hover { background: rgba(255,255,255,0.03); }
-
-.workout-ex-head-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.workout-ex-index {
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: rgba(0,0,0,0.22);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(229,231,235,0.85);
-  font-weight: 900;
-  font-size: 12px;
-  flex-shrink: 0;
-}
-
-.workout-ex-meta { min-width: 0; }
-
-.workout-ex-name {
-  font-weight: 900;
-  font-size: 13px;
-  color: rgba(255,255,255,0.95);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.workout-ex-sub {
-  margin-top: 2px;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.workout-ex-head-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.workout-ex-badge {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 900;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(229,231,235,0.86);
-}
-
-.workout-ex-chevron {
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.18);
-  color: rgba(229,231,235,0.75);
-  transition: transform 0.15s ease;
-}
-.workout-ex-chevron.open { transform: rotate(180deg); }
-
-.workout-ex-body {
-  padding: 12px 14px 14px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
-
-.workout-ex-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 12px;
-  color: rgba(229,231,235,0.70);
-}
-
-.workout-ex-status-label {
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(34,197,94,0.12);
-  border: 1px solid rgba(34,197,94,0.22);
-  color: rgba(134,239,172,0.95);
-  font-weight: 900;
-}
-
-.workout-ex-status-item b { color: rgba(255,255,255,0.92); }
-
-.workout-grid-head {
-  display: grid;
-  grid-template-columns: 80px 1fr 1fr 42px;
-  gap: 10px;
-  font-size: 11px;
-  color: rgba(229,231,235,0.50);
-  padding: 8px 10px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  margin-bottom: 10px;
-}
-
-.workout-set-row {
-  display: grid;
-  grid-template-columns: 80px 1fr 1fr 42px;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 10px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.03);
-  margin-bottom: 8px;
-}
-
-.workout-set-row--done {
-  border-color: rgba(34,197,94,0.22);
-  background: rgba(34,197,94,0.05);
-}
-
-.workout-set-cell--set { display: flex; align-items: center; }
-
-.workout-set-pill {
-  width: 34px;
-  height: 26px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: rgba(0,0,0,0.22);
-  border: 1px solid rgba(255,255,255,0.08);
-  font-weight: 900;
-  font-size: 12px;
-}
-
-.workout-stepper {
-  display: grid;
-  grid-template-columns: 34px 1fr 34px;
-  gap: 8px;
-  align-items: center;
-}
-
-.workout-step {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.18);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: rgba(229,231,235,0.9);
-  font-weight: 900;
-}
-.workout-step:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(34,197,94,0.25);
-}
-.workout-step:active { transform: translateY(1px); }
-
-.workout-input {
-  width: 100%;
-  height: 34px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: rgba(229,231,235,0.92);
-  padding: 0 10px;
-  outline: none;
-}
-.workout-input:focus {
-  border-color: rgba(34, 197, 94, 0.35);
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25), 0 0 24px rgba(34, 197, 94, 0.14);
-}
-
-.workout-set-cell--check { display: flex; justify-content: flex-end; }
-
-.workout-check {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.18);
-  color: rgba(229,231,235,0.6);
-  font-weight: 900;
-}
-.workout-check:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(34,197,94,0.25);
-}
-.workout-check--on {
-  background: rgba(34,197,94,0.18);
-  border-color: rgba(34,197,94,0.35);
-  color: rgba(134,239,172,0.95);
-}
-
-.workout-hint {
-  margin-top: 8px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(34,197,94,0.08);
-  border: 1px solid rgba(34,197,94,0.18);
-  color: rgba(134,239,172,0.90);
-  font-size: 12px;
-}
-
-.workout-footer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 12px 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255,255,255,0.06);
-  z-index: 60;
-  display: flex;
-  justify-content: center;
-}
-
-.workout-footer .workout-footer-btn {
-  min-width: 220px;
-  height: 44px;
-  border-radius: 14px;
-}
-
-.workout-footer .corefit-container { display: flex; gap: 12px; }
-
-.workout-footer-btn { padding: 10px 14px !important; }
-
-.workout-footer-primary { flex: 1; max-width: 620px; }
-
-@media (max-width: 640px) {
-  .workout-top { flex-direction: column; align-items: stretch; }
-  .workout-top-right { justify-content: space-between; }
-
-  .workout-grid-head,
-  .workout-set-row { grid-template-columns: 64px 1fr 1fr 42px; }
-
-  .workout-footer .workout-footer-btn {
-    min-width: 0;
-    width: 48%;
-  }
-}
-
-/* =========================================================
-   HISTÓRICO (igual print)
-========================================================= */
-
-.history-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.history-titlewrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.history-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: rgba(34,197,94,0.16);
-  border: 1px solid rgba(34,197,94,0.28);
-  color: rgba(134,239,172,0.95);
-  font-weight: 900;
-}
-
-.history-title {
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: -0.3px;
-  color: rgba(255,255,255,0.96);
-}
-
-.history-subtitle {
-  font-size: 12px;
-  color: rgba(229,231,235,0.62);
-  margin-top: 1px;
-}
-
-.history-filter {
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-weight: 900;
-  font-size: 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: rgba(229,231,235,0.9);
-}
-.history-filter:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.history-summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.history-summary-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  padding: 14px 14px;
-}
-
-.history-summary-label {
-  font-size: 11px;
-  color: rgba(229,231,235,0.55);
-  margin-bottom: 6px;
-}
-
-.history-summary-value {
-  font-size: 18px;
-  font-weight: 900;
-  color: rgba(255,255,255,0.95);
-}
-
-.history-section-label {
-  font-size: 12px;
-  color: rgba(229,231,235,0.62);
-  margin-bottom: 10px;
-}
-
-.history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.history-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 14px 40px rgba(0,0,0,0.35);
-}
-
-.history-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.history-card-title {
-  font-weight: 900;
-  font-size: 14px;
-  color: rgba(255,255,255,0.96);
-}
-
-.history-chip {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 900;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: rgba(229,231,235,0.75);
-  flex-shrink: 0;
-}
-
-.history-chip--ok {
-  background: rgba(34,197,94,0.12);
-  border-color: rgba(34,197,94,0.22);
-  color: rgba(134,239,172,0.95);
-}
-
-.history-card-meta {
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: rgba(229,231,235,0.62);
-}
-
-.history-meta-row { display: flex; align-items: center; gap: 8px; }
-.history-meta-dot { opacity: 0.7; }
-
-.history-stats {
-  margin-top: 12px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-}
-
-.history-stat {
-  background: rgba(0,0,0,0.20);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 12px;
-  text-align: center;
-}
-
-.history-stat-label {
-  font-size: 11px;
-  color: rgba(229,231,235,0.55);
-  margin-bottom: 6px;
-}
-
-.history-stat-value {
-  font-size: 16px;
-  font-weight: 900;
-  color: rgba(255,255,255,0.95);
-}
-
-.history-actions {
-  margin-top: 12px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.history-link {
-  font-size: 12px;
-  font-weight: 900;
-  color: rgba(134,239,172,0.95);
-  text-decoration: none;
-}
-.history-link:hover { text-decoration: underline; }
-.history-arrow { margin-left: 6px; }
-
-@media (max-width: 720px) {
-  .history-summary { grid-template-columns: 1fr; }
-  .history-stats { grid-template-columns: 1fr; }
-}
-
-/* ===== Auth fixes (Bootstrap shield) ===== */
-.auth-pass-wrap { position: relative; }
-
 .auth-eye {
-  all: unset;                 /* <- mata bootstrap no button */
+  all: unset;
   position: absolute;
   right: 10px;
   top: 50%;
@@ -870,134 +246,58 @@ body {
   display: grid;
   place-items: center;
   cursor: pointer;
-
-  background: rgba(0,0,0,0.18);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: rgba(229,231,235,0.7);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(229, 231, 235, 0.7);
 }
 
 .auth-eye:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(34,197,94,0.25);
-  color: rgba(229,231,235,0.85);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(34, 197, 94, 0.25);
+  color: rgba(229, 231, 235, 0.85);
 }
 
-.auth-pass-input { padding-right: 44px; }
+.hero-animate {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: heroFadeUp 0.6s ease-out forwards;
+}
 
+.hero-delay-1 {
+  animation-delay: 0.05s;
+}
 
-/* =========================================
-   MOBILE FIX REAL - WORKOUT SETS
-========================================= */
-@media (max-width: 520px) {
+.hero-delay-2 {
+  animation-delay: 0.15s;
+}
 
-  .workout-grid-head {
-    display: none !important;
-  }
+.hero-delay-3 {
+  animation-delay: 0.25s;
+}
 
-  .workout-set-row {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-    padding: 14px !important;
-  }
+.hero-delay-4 {
+  animation-delay: 0.35s;
+}
 
-  .workout-set-cell--set {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-  }
-
-  .workout-set-pill {
-    font-size: 14px !important;
-  }
-
-  .workout-stepper {
-    width: 100% !important;
-    display: flex !important;
-    gap: 10px !important;
-  }
-
-  .workout-step {
-    min-width: 48px !important;
-    min-height: 48px !important;
-    font-size: 18px !important;
-  }
-
-  .workout-input {
-    flex: 1 !important;
-    min-height: 48px !important;
-    font-size: 16px !important;
-    text-align: center !important;
-  }
-
-  .workout-set-cell--check {
-    align-self: flex-end !important;
-  }
-
-  .workout-check {
-    min-width: 48px !important;
-    min-height: 48px !important;
-    font-size: 18px !important;
-  }
-
-  @media (max-width: 520px) {
-  /* rótulos acima dos steppers */
-  .workout-stepper--reps::before,
-  .workout-stepper--weight::before {
-    display: block;
-    font-size: 12px;
-    opacity: 0.75;
-    margin-bottom: 6px;
-  }
-
-  .workout-stepper--reps::before {
-    content: "Reps";
-  }
-
-  .workout-stepper--weight::before {
-    content: "Peso (kg)";
-  }
-
-  /* deixa o check menos “solto” e mais alinhado */
-  .workout-set-cell--check {
-    width: 100%;
-    display: flex !important;
-    justify-content: flex-end !important;
-    margin-top: 6px;
-  }
-
-  .workout-check {
-    border-radius: 14px !important;
+@keyframes heroFadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.workout-set-pill {
-  margin-bottom: 6px;
+.register-label {
+  color: rgba(34, 197, 94, 0.85);
+  font-weight: 600;
 }
-
-.workout-check--on {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: white;
-  border-color: #22c55e;
-}
-
-}
-
-/* ===== Corefit UI Primitives ===== */
 
 .cf-card {
   background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
   border: 1px solid var(--cf-border);
-  border-radius: var(--cf-radius-md);
-  box-shadow: var(--cf-shadow-md);
+  border-radius: 16px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-}
-
-.cf-divider {
-  height: 1px;
-  background: var(--cf-border);
-  width: 100%;
 }
 
 .cf-input {
@@ -1008,17 +308,12 @@ body {
   border-radius: 12px;
   padding: 10px 12px;
   outline: none;
-  transition: border-color var(--cf-fast) var(--cf-ease), box-shadow var(--cf-fast) var(--cf-ease);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .cf-input:focus {
   border-color: var(--cf-green-border);
   box-shadow: var(--cf-ring);
-}
-
-.cf-input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .cf-btn {
@@ -1030,8 +325,7 @@ body {
   padding: 10px 14px;
   font-weight: 800;
   border: 1px solid transparent;
-  transition: transform var(--cf-fast) var(--cf-ease), filter var(--cf-fast) var(--cf-ease),
-    background var(--cf-fast) var(--cf-ease), border-color var(--cf-fast) var(--cf-ease);
+  transition: transform 160ms ease, filter 160ms ease, background 160ms ease, border-color 160ms ease;
   user-select: none;
 }
 
@@ -1073,251 +367,12 @@ body {
   font-size: 12px;
   font-weight: 800;
   border: 1px solid var(--cf-border);
-  color: var(--cf-muted);
+  color: rgba(229, 231, 235, 0.72);
   background: rgba(255, 255, 255, 0.04);
 }
 
 .cf-badge-success {
   border-color: var(--cf-green-border);
-  background: var(--cf-green-2);
+  background: var(--cf-green-soft);
   color: rgba(134, 239, 172, 0.95);
-}
-
-/* =========================================
-   LOGIN - APP MODE (mobile only)
-========================================= */
-
-@media (max-width: 640px) {
-
-  .auth-page .corefit-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-
-  .auth-page .card-dark {
-    border-radius: 26px !important;
-    padding: 22px !important;
-  }
-
-  .auth-page .login-hero {
-    height: 160px;
-  }
-
-}
-/* =========================
-   AUTH (LOGIN) — COESO E CENTRALIZADO
-   ========================= */
-
-.auth-page {
-  min-height: 100vh;
-}
-
-/* área útil descontando topbar (ajuste se seu navbar for outro tamanho) */
-.auth-container {
-  min-height: calc(100vh - 72px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px 0;
-}
-
-/* card com largura “app” e conteúdo coeso */
-.auth-card {
-  width: min(480px, 92vw);
-  padding: 22px;
-  border-radius: 22px;
-}
-
-/* cabeçalho centralizado */
-.auth-card h1,
-.auth-card .auth-title {
-  text-align: center;
-  margin-bottom: 6px;
-}
-
-.auth-card p,
-.auth-card .auth-subtitle {
-  text-align: center;
-  margin-bottom: 18px;
-  color: rgba(229,231,235,0.65);
-}
-
-/* ícone/logo central */
-.auth-card .auth-logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-/* form mais “alinhado” */
-.auth-card form {
-  width: 100%;
-}
-
-/* labels e inputs com spacing consistente */
-.auth-card label {
-  display: block;
-  margin: 10px 0 6px;
-}
-
-/* mantém campos 100% e com bom respiro */
-.auth-card input,
-.auth-card .input-group {
-  width: 100%;
-}
-
-/* botão principal com largura total e altura “tap friendly” */
-.auth-card button[type="submit"],
-.auth-card .btn-green {
-  width: 100%;
-  height: 46px;
-  border-radius: 14px;
-  margin-top: 12px;
-}
-
-/* links embaixo alinhados e com espaçamento */
-.auth-card .auth-links {
-  margin-top: 12px;
-  text-align: center;
-  display: grid;
-  gap: 8px;
-}
-
-.auth-card label {
-  text-align: left;
-  display: block;
-  width: 100%;
-}
-
-/* =========================
-   Auth - micro animações premium (SAFE)
-   escopo: só dentro do card do login/register
-========================= */
-
-.auth-card .btn-green {
-  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
-  will-change: transform;
-  box-shadow:
-    0 10px 24px rgba(34, 197, 94, 0.18),
-    0 0 0 1px rgba(34, 197, 94, 0.12) inset;
-}
-
-.auth-card .btn-green:hover {
-  transform: translateY(-2px) scale(1.01);
-  filter: saturate(1.08);
-  box-shadow:
-    0 16px 34px rgba(34, 197, 94, 0.28),
-    0 0 0 1px rgba(34, 197, 94, 0.20) inset,
-    0 0 22px rgba(34, 197, 94, 0.14);
-}
-
-.auth-card .btn-green:active {
-  transform: translateY(0px) scale(0.99);
-  filter: saturate(1.02);
-  box-shadow:
-    0 10px 24px rgba(34, 197, 94, 0.18),
-    0 0 0 1px rgba(34, 197, 94, 0.12) inset;
-}
-
-.auth-card .btn-green:focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 3px rgba(34, 197, 94, 0.25),
-    0 16px 34px rgba(34, 197, 94, 0.22);
-}
-
-/* =========================
-   AUTH PREMIUM FX (scoped)
-========================= */
-
-.auth-page .btn-green {
-  position: relative;
-  overflow: hidden;
-  transform: translateZ(0);
-  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
-}
-
-.auth-page .btn-green:hover {
-  transform: translateY(-1px);
-  filter: saturate(1.06);
-  box-shadow:
-    0 14px 34px rgba(34, 197, 94, 0.28),
-    0 0 0 1px rgba(34, 197, 94, 0.18) inset,
-    0 0 22px rgba(34, 197, 94, 0.16);
-}
-
-.auth-page .btn-green:active {
-  transform: translateY(0);
-}
-
-/* Shine */
-.auth-page .btn-green::after {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  transform: translateX(-120%) skewX(-18deg);
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.14) 35%,
-    rgba(255, 255, 255, 0.22) 50%,
-    rgba(255, 255, 255, 0.14) 65%,
-    transparent 100%
-  );
-  opacity: 0;
-  pointer-events: none;
-}
-
-.auth-page .btn-green:hover::after {
-  opacity: 1;
-  animation: auth-shine 900ms ease forwards;
-}
-
-@keyframes auth-shine {
-  to {
-    transform: translateX(120%) skewX(-18deg);
-  }
-}
-/* Focus glow premium no input */
-.auth-page .input-dark {
-  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
-}
-
-.auth-page .input-dark:focus {
-  outline: none;
-  border-color: rgba(34, 197, 94, 0.45) !important;
-  box-shadow:
-    0 0 0 3px rgba(34, 197, 94, 0.14),
-    0 10px 26px rgba(0, 0, 0, 0.35);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-/* Eye button acompanhando o foco do campo */
-.auth-page .input-dark:focus + .auth-eye,
-.auth-page .auth-eye:hover {
-  border-color: rgba(34, 197, 94, 0.35);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.10);
-}
-
-/* Micro fade do título */
-.auth-page .auth-title {
-  transition: opacity 220ms ease, transform 220ms ease;
-}
-
-.auth-page .auth-title.is-switching {
-  opacity: 0;
-  transform: translateY(4px);
-}
-
-/* Entrada do card */
-.auth-page .auth-card {
-  animation: auth-card-in 520ms ease both;
-  will-change: transform, opacity;
-}
-
-@keyframes auth-card-in {
-  from { opacity: 0; transform: translateY(10px) scale(0.995); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
 }

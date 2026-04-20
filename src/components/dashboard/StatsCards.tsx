@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { apiFetch } from "@/lib/apiFetch";
-import { Activity, CalendarDays, Dumbbell } from "lucide-react";
+import { Activity, CalendarDays, Dumbbell, Flame } from "lucide-react";
 
-import { CFCard } from "@/components/ui/CFCard";
+import { apiFetch } from "@/lib/apiFetch";
+import { CFSection } from "@/components/corefit/primitives";
 
 type Workout = {
   finishedAt?: string | null;
@@ -14,64 +14,54 @@ type Me = {
   weeklyGoalDays?: number;
 };
 
-function startOfDay(d: Date) {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+type ViewModel = {
+  weekScorePct: number;
+  weekActiveDays: number;
+  weekGoalDays: number;
+  weekMap: number[];
+  workoutsFinishedInMonth: number;
+  deltaVsPrev: number;
+  monthLabel: string;
+  prevMonthLabel: string;
+  streakDays: number;
+};
+
+const MONTHS_PT = ["jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
+
+function startOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 }
 
 function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
-const MONTHS_PT = [
-  "jan.",
-  "fev.",
-  "mar.",
-  "abr.",
-  "mai.",
-  "jun.",
-  "jul.",
-  "ago.",
-  "set.",
-  "out.",
-  "nov.",
-  "dez.",
-];
-
-function monthLabelPTBR(d = new Date()) {
-  return MONTHS_PT[d.getMonth()];
+function monthLabelPTBR(date = new Date()) {
+  return MONTHS_PT[date.getMonth()];
 }
 
-function prevMonthLabelPTBR(d = new Date()) {
-  const pm = new Date(d.getFullYear(), d.getMonth() - 1, 1);
-  return monthLabelPTBR(pm);
+function prevMonthLabelPTBR(date = new Date()) {
+  const previousMonth = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+  return monthLabelPTBR(previousMonth);
 }
 
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n));
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
 }
 
-/** CountUp simples (sem lib) - SEM quebrar ordem de hooks */
 function useCountUp(target: number, durationMs = 700) {
   const [value, setValue] = useState(0);
 
   useEffect(() => {
-    const to = Number.isFinite(target) ? target : 0;
-    const from = 0;
+    const finalValue = Number.isFinite(target) ? target : 0;
     const start = performance.now();
     let raf = 0;
 
     function tick(now: number) {
-      const t = Math.min(1, (now - start) / durationMs);
-      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
-      const current = from + (to - from) * eased;
-
-      setValue(current);
-
-      if (t < 1) raf = requestAnimationFrame(tick);
+      const progress = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(finalValue * eased);
+      if (progress < 1) raf = requestAnimationFrame(tick);
     }
 
     raf = requestAnimationFrame(tick);
@@ -81,42 +71,77 @@ function useCountUp(target: number, durationMs = 700) {
   return value;
 }
 
-type ViewModel = {
-  weekScorePct: number;
-  weekActiveDays: number;
-  weekGoalDays: number;
-  weekMap: number[]; // seg..dom (7)
+function calculateStreak(finishedDates: Date[]) {
+  if (!finishedDates.length) return 0;
 
-  workoutsFinishedInMonth: number;
-  prevMonthFinished: number;
-  deltaVsPrev: number;
+  const uniqueDays = Array.from(new Set(finishedDates.map((date) => startOfDay(date).getTime()))).sort((a, b) => b - a);
 
-  monthLabel: string;
-  prevMonthLabel: string;
-};
+  let streak = 0;
+  let cursor = startOfDay(new Date()).getTime();
+
+  if (uniqueDays[0] !== cursor && uniqueDays[0] !== cursor - 86400000) {
+    return 0;
+  }
+
+  if (uniqueDays[0] === cursor - 86400000) {
+    cursor = uniqueDays[0];
+  }
+
+  for (const day of uniqueDays) {
+    if (day === cursor) {
+      streak += 1;
+      cursor -= 86400000;
+      continue;
+    }
+    break;
+  }
+
+  return streak;
+}
+
+function consistencyMessage(weekActiveDays: number, goal: number, streakDays: number) {
+  if (weekActiveDays === 0) {
+    return "Voce esta comecando sua semana. Bora construir consistencia.";
+  }
+  if (streakDays >= 3) {
+    return `Sequencia ativa: ${streakDays} dias mantendo o ritmo.`;
+  }
+  if (weekActiveDays >= goal) {
+    return "Meta da semana batida. Agora e manter o padrao.";
+  }
+  return `Voce ja marcou ${weekActiveDays} dia(s). Continue empilhando sessoes.`;
+}
+
+function weeklyGoalMessage(weekActiveDays: number, goal: number) {
+  const left = Math.max(goal - weekActiveDays, 0);
+  if (left === 0) return "Meta da semana concluida. Excelente ritmo.";
+  if (weekActiveDays === 0) return "Voce esta comecando sua semana. Bora construir consistencia.";
+  if (left === 1) return "Falta 1 treino para bater sua meta.";
+  return `Faltam ${left} treinos para bater sua meta.`;
+}
+
+function monthMessage(monthCount: number, delta: number, monthLabel: string) {
+  if (monthCount === 0) return `Seu volume de ${monthLabel} ainda esta zerado.`;
+  if (delta > 0) return "Mais sessoes concluidas do que no mes anterior.";
+  if (delta < 0) return "Um pouco abaixo do mes anterior, mas ainda no jogo.";
+  return "Mesmo ritmo do mes anterior ate aqui.";
+}
 
 function SkeletonCard() {
   return (
-    <CFCard style={{ padding: 16 }}>
+    <CFSection tone="default" padding="md" className="kpi-card-shell">
       <div className="kpi-icon mb-3" />
-      <div
-        style={{
-          height: 26,
-          width: 90,
-          borderRadius: 10,
-          background: "rgba(255,255,255,0.08)",
-        }}
-      />
+      <div style={{ height: 26, width: 90, borderRadius: 10, background: "rgba(255,255,255,0.08)" }} />
       <div
         style={{
           height: 12,
-          width: 120,
+          width: 140,
           borderRadius: 10,
           background: "rgba(255,255,255,0.06)",
           marginTop: 10,
         }}
       />
-    </CFCard>
+    </CFSection>
   );
 }
 
@@ -133,81 +158,62 @@ export function StatsCards({ refreshKey }: Props) {
 
     try {
       const [workoutsRaw, me] = await Promise.all([
-        apiFetch<any>("/workouts"),
+        apiFetch<unknown>("/workouts"),
         apiFetch<Me>("/users/me").catch(() => ({} as Me)),
       ]);
 
       const workouts: Workout[] = Array.isArray(workoutsRaw)
-        ? workoutsRaw
-        : Array.isArray(workoutsRaw?.items)
-        ? workoutsRaw.items
+        ? (workoutsRaw as Workout[])
+        : Array.isArray((workoutsRaw as { items?: Workout[] })?.items)
+        ? ((workoutsRaw as { items: Workout[] }).items ?? [])
         : [];
 
       const finishedDates = workouts
-        .map((w) => (w?.finishedAt ? new Date(w.finishedAt) : null))
-        .filter((d): d is Date => !!d && !Number.isNaN(d.getTime()));
+        .map((workout) => (workout?.finishedAt ? new Date(workout.finishedAt) : null))
+        .filter((date): date is Date => !!date && !Number.isNaN(date.getTime()));
 
       const goal =
         typeof me?.weeklyGoalDays === "number" && me.weeklyGoalDays > 0
           ? Math.min(7, Math.max(1, me.weeklyGoalDays))
           : 4;
 
-      // Semana (segunda..domingo)
       const now = new Date();
       const today0 = startOfDay(now);
-
-      const day = today0.getDay(); // 0 dom .. 6 sab
-      const diffToMonday = (day + 6) % 7; // dom->6, seg->0...
+      const day = today0.getDay();
+      const diffToMonday = (day + 6) % 7;
       const monday = new Date(today0);
       monday.setDate(today0.getDate() - diffToMonday);
 
-      const weekDays: Date[] = Array.from({ length: 7 }).map((_, i) => {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        return d;
+      const weekDays: Date[] = Array.from({ length: 7 }).map((_, index) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + index);
+        return date;
       });
 
-      const weekMap: number[] = weekDays.map((wd) => {
-        const has = finishedDates.some((fd) => isSameDay(fd, wd));
-        return has ? 1 : 0;
-      });
-
-      const weekActiveDays = weekMap.reduce<number>((acc, v) => acc + (v ? 1 : 0), 0);
+      const weekMap = weekDays.map((weekDay) => (finishedDates.some((finishedDay) => isSameDay(finishedDay, weekDay)) ? 1 : 0));
+      const weekActiveDays = weekMap.reduce<number>((total, dayValue) => total + (dayValue ? 1 : 0), 0);
       const weekScorePct = Math.round((weekActiveDays / goal) * 100);
 
-      // Mês atual
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const workoutsFinishedInMonth = finishedDates.filter((date) => date >= monthStart && date < nextMonthStart).length;
 
-      const workoutsFinishedInMonth = finishedDates.filter(
-        (d) => d >= monthStart && d < nextMonthStart
-      ).length;
-
-      // Mês anterior
       const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const prevNextStart = monthStart;
-
-      const prevMonthFinished = finishedDates.filter(
-        (d) => d >= prevMonthStart && d < prevNextStart
-      ).length;
-
-      const deltaVsPrev = workoutsFinishedInMonth - prevMonthFinished;
+      const prevMonthFinished = finishedDates.filter((date) => date >= prevMonthStart && date < monthStart).length;
 
       setVm({
         weekScorePct: Number.isFinite(weekScorePct) ? Math.max(0, weekScorePct) : 0,
         weekActiveDays,
         weekGoalDays: goal,
         weekMap,
-
         workoutsFinishedInMonth,
-        prevMonthFinished,
-        deltaVsPrev,
-
+        deltaVsPrev: workoutsFinishedInMonth - prevMonthFinished,
         monthLabel: monthLabelPTBR(now),
         prevMonthLabel: prevMonthLabelPTBR(now),
+        streakDays: calculateStreak(finishedDates),
       });
-    } catch (e) {
-      console.error("StatsCards load error:", e);
+    } catch (error) {
+      console.error("StatsCards load error:", error);
       setVm(null);
     } finally {
       setLoading(false);
@@ -216,18 +222,13 @@ export function StatsCards({ refreshKey }: Props) {
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey]);
 
   const dayLabels = useMemo(() => ["S", "T", "Q", "Q", "S", "S", "D"], []);
-
-  const weekScoreTarget = vm?.weekScorePct ?? 0;
-  const weekDoneTarget = vm?.weekActiveDays ?? 0;
-  const monthTarget = vm?.workoutsFinishedInMonth ?? 0;
-
-  const pctAnim = useCountUp(weekScoreTarget, 750);
-  const weekDoneAnim = useCountUp(weekDoneTarget, 750);
-  const monthAnim = useCountUp(monthTarget, 800);
+  const pctAnim = useCountUp(vm?.weekScorePct ?? 0, 750);
+  const weekDoneAnim = useCountUp(vm?.weekActiveDays ?? 0, 750);
+  const monthAnim = useCountUp(vm?.workoutsFinishedInMonth ?? 0, 800);
+  const streakAnim = useCountUp(vm?.streakDays ?? 0, 700);
 
   if (loading || !vm) {
     return (
@@ -240,149 +241,84 @@ export function StatsCards({ refreshKey }: Props) {
   }
 
   const progressPct = clamp((vm.weekActiveDays / vm.weekGoalDays) * 100, 0, 100);
-
-  const safePrevLabel = vm.prevMonthLabel?.trim() ? vm.prevMonthLabel : "mês anterior";
+  const safePrevLabel = vm.prevMonthLabel?.trim() ? vm.prevMonthLabel : "mes anterior";
   const safeDelta = Number.isFinite(vm.deltaVsPrev) ? vm.deltaVsPrev : 0;
-  const deltaText = safeDelta === 0 ? "0" : safeDelta > 0 ? `+${safeDelta}` : `${safeDelta}`;
+  const deltaText = safeDelta === 0 ? "Sem mudanca" : safeDelta > 0 ? `+${safeDelta}` : `${safeDelta}`;
+  const deltaTone = safeDelta > 0 ? "#22c55e" : safeDelta < 0 ? "#f59e0b" : "rgba(229,231,235,0.6)";
 
   return (
     <div className="row g-4">
-      {/* 1) ACOMPANHAMENTO */}
       <div className="col-12 col-md-4">
-        <CFCard style={{ padding: 16 }}>
-          <span className="kpi-icon mb-3">
-            <Activity size={18} />
-          </span>
+        <CFSection tone="default" padding="md" className="kpi-card-shell kpi-card-shell--highlight kpi-card-animate">
+          <div className="kpi-card-header">
+            <span className="kpi-icon"><Activity size={18} /></span>
+            <div className="kpi-card-kicker">Constancia</div>
+          </div>
+          <div className="kpi-card-topline">Seu ritmo da semana</div>
+          <div className="kpi-card-value">{Math.round(pctAnim)}%</div>
+          <div className="kpi-card-description">{consistencyMessage(vm.weekActiveDays, vm.weekGoalDays, vm.streakDays)}</div>
 
-          <div className="text-white text-3xl font-extrabold leading-none">
-            {Math.round(pctAnim)}%
+          <div className="kpi-streak-pill">
+            <span className="kpi-streak-icon"><Flame size={13} /></span>
+            <b>{Math.round(streakAnim)} dia(s)</b>
+            <span>de sequencia</span>
           </div>
 
-          <div className="text-white/60 text-[11px] tracking-wide uppercase mt-2">
-            Acompanhamento
-          </div>
-
-          <div className="mt-3 d-flex align-items-center gap-2">
-            {dayLabels.map((d, i) => {
-              const on = vm.weekMap[i] === 1;
+          <div className="kpi-week-strip">
+            {dayLabels.map((label, index) => {
+              const active = vm.weekMap[index] === 1;
               return (
-                <div key={i} style={{ display: "grid", placeItems: "center" }}>
+                <div key={`${label}-${index}`} className="kpi-week-day">
                   <div
+                    className={`kpi-week-box${active ? " kpi-week-box--active" : ""}`}
                     style={{
-                      width: 18,
-                      height: 18,
-                      borderRadius: 6,
-                      border: "1px solid rgba(255,255,255,0.10)",
-                      background: on ? "rgba(34,197,94,0.35)" : "rgba(255,255,255,0.05)",
-                      boxShadow: on ? "0 0 14px rgba(34,197,94,0.14)" : undefined,
-                      transition: "all .18s ease",
+                      background: active ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.04)",
+                      borderColor: active ? "rgba(34,197,94,0.32)" : "rgba(255,255,255,0.08)",
                     }}
-                    title={d}
                   />
-                  <div className="text-white/40" style={{ fontSize: 10, marginTop: 4 }}>
-                    {d}
-                  </div>
+                  <span>{label}</span>
                 </div>
               );
             })}
           </div>
-
-          <div className="text-white/40 text-xs mt-2">presença na semana</div>
-        </CFCard>
+        </CFSection>
       </div>
 
-      {/* 2) RITMO SEMANAL */}
       <div className="col-12 col-md-4">
-        <CFCard style={{ padding: 16 }}>
-          <span className="kpi-icon mb-3">
-            <CalendarDays size={18} />
-          </span>
-
-          <div className="text-white text-3xl font-extrabold leading-none">
-            {Math.round(weekDoneAnim)}/{vm.weekGoalDays}
+        <CFSection tone="default" padding="md" className="kpi-card-shell kpi-card-animate">
+          <div className="kpi-card-header">
+            <span className="kpi-icon"><CalendarDays size={18} /></span>
+            <div className="kpi-card-kicker">Meta semanal</div>
           </div>
-
-          <div className="text-white/60 text-[11px] tracking-wide uppercase mt-2">
-            Ritmo semanal
-          </div>
-
-          <div className="mt-3 d-flex align-items-center gap-2">
-            <span
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 999,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "rgba(34,197,94,0.12)",
-                border: "1px solid rgba(34,197,94,0.25)",
-                color: "rgba(34,197,94,0.95)",
-                flexShrink: 0,
-              }}
-              title="Progresso"
-            >
-              ⏱️
-            </span>
-
-            <div
-              style={{
-                position: "relative",
-                height: 10,
-                width: "100%",
-                borderRadius: 999,
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  height: "100%",
-                  width: `${progressPct}%`,
-                  borderRadius: 999,
-                  background: "rgba(34,197,94,0.85)",
-                  boxShadow: "0 0 18px rgba(34,197,94,0.35)",
-                  transition: "width .35s ease",
-                }}
-              />
+          <div className="kpi-card-topline">O que falta para bater a meta</div>
+          <div className="kpi-card-value">{Math.round(weekDoneAnim)}/{vm.weekGoalDays}</div>
+          <div className="kpi-card-description">{weeklyGoalMessage(vm.weekActiveDays, vm.weekGoalDays)}</div>
+          <div className="kpi-progress-row">
+            <div className="kpi-progress-meta">
+              <span>Progresso</span>
+              <b>{Math.round(progressPct)}%</b>
+            </div>
+            <div className="kpi-progress-bar">
+              <div className="kpi-progress-fill" style={{ width: `${progressPct}%` }} />
             </div>
           </div>
-
-          <div className="text-white mt-3" style={{ fontWeight: 800 }}>
-            Meta: <span style={{ fontWeight: 900 }}>{vm.weekGoalDays}</span> dias
-          </div>
-        </CFCard>
+        </CFSection>
       </div>
 
-      {/* 3) TREINOS NO MÊS */}
       <div className="col-12 col-md-4">
-        <CFCard style={{ padding: 16 }}>
-          <span className="kpi-icon mb-3">
-            <Dumbbell size={18} />
-          </span>
-
-          <div className="text-white text-3xl font-extrabold leading-none">
-            {Math.round(monthAnim)}
+        <CFSection tone="default" padding="md" className="kpi-card-shell kpi-card-shell--subtle kpi-card-animate">
+          <div className="kpi-card-header">
+            <span className="kpi-icon"><Dumbbell size={18} /></span>
+            <div className="kpi-card-kicker">Treinos no mes</div>
           </div>
-
-          <div className="text-white/60 text-[11px] tracking-wide uppercase mt-2">
-            Treinos no mês
+          <div className="kpi-card-topline">Volume de sessoes concluidas</div>
+          <div className="kpi-card-value kpi-card-value--soft">{Math.round(monthAnim)}</div>
+          <div className="kpi-card-description">{monthMessage(vm.workoutsFinishedInMonth, vm.deltaVsPrev, vm.monthLabel)}</div>
+          <div className="kpi-month-delta">
+            <b style={{ color: deltaTone }}>{deltaText}</b>
+            <span> em relacao a {safePrevLabel}</span>
           </div>
-
-          <div className="text-white/40 text-xs mt-1">em {vm.monthLabel}</div>
-
-          <div className="mt-3" style={{ height: 26 }} />
-
-          <div className="mt-1" style={{ fontSize: 13, fontWeight: 800 }}>
-            <span style={{ color: safeDelta >= 0 ? "#f59e0b" : "rgba(229,231,235,0.65)" }}>
-              {deltaText}
-            </span>{" "}
-            <span style={{ color: "rgba(229,231,235,0.65)", fontWeight: 700 }}>
-              em relação a {safePrevLabel}
-            </span>
-          </div>
-        </CFCard>
+        </CFSection>
       </div>
     </div>
   );

@@ -1,0 +1,728 @@
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  background: rgba(34, 197, 94, 0.12);
+  color: rgba(134, 239, 172, 0.95);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ai-page {
+  max-width: 1180px;
+  padding-top: 152px;
+  padding-bottom: 48px;
+}
+
+.ai-page__hero,
+.ai-page__workspace-main,
+.ai-page__workspace-side,
+.ai-page__result,
+.ai-page__hero-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-page__hero {
+  border-radius: 28px;
+  background:
+    linear-gradient(90deg, rgba(4, 10, 6, 0.88) 0%, rgba(4, 10, 6, 0.7) 40%, rgba(4, 10, 6, 0.72) 100%);
+}
+
+.ai-page__hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(520px 260px at 14% 0%, rgba(34, 197, 94, 0.18), transparent 70%),
+    radial-gradient(360px 220px at 100% 18%, rgba(34, 197, 94, 0.16), transparent 72%),
+    linear-gradient(180deg, rgba(2, 6, 4, 0.08), rgba(2, 6, 4, 0.3));
+  pointer-events: none;
+}
+
+.ai-page__hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/Hero-ia.png");
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+  opacity: 0.36;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.ai-page__hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr);
+  gap: 22px;
+}
+
+.ai-page__eyebrow,
+.ai-page__panel-title,
+.ai-page__section-eyebrow,
+.ai-page__live-preview-eyebrow,
+.ai-page__result-identity-label,
+.ai-page__next-step-card-label,
+.ai-page__stat-label {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(134, 239, 172, 0.88);
+}
+
+.ai-page__title {
+  margin-top: 18px;
+  max-width: 680px;
+  font-size: clamp(42px, 5vw, 72px);
+  line-height: 0.92;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  color: rgba(255, 255, 255, 0.98);
+}
+
+.ai-page__description {
+  margin-top: 18px;
+  max-width: 620px;
+  font-size: 15px;
+  line-height: 1.85;
+  color: rgba(226, 232, 240, 0.76);
+}
+
+.ai-page__hero-badges,
+.ai-page__hero-actions,
+.ai-page__side-stack,
+.ai-page__hero-stats,
+.ai-page__draft-grid,
+.ai-page__exercise-list {
+  display: grid;
+  gap: 12px;
+}
+
+.ai-page__hero-badges,
+.ai-page__hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.ai-page__hero-panel,
+.ai-page__side-card,
+.ai-page__draft-card,
+.ai-page__exercise-card,
+.ai-page__generation-meta,
+.ai-page__live-preview,
+.ai-page__coach-brief,
+.ai-page__coach-insight,
+.ai-page__next-step,
+.ai-page__result-identity-card,
+.ai-page__next-step-card,
+.ai-page__stat-card,
+.ai-page__mode-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.24);
+}
+
+.ai-page__hero-panel {
+  padding: 18px;
+  min-height: 100%;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(8, 15, 10, 0.92), rgba(8, 15, 10, 0.76));
+  backdrop-filter: blur(12px);
+}
+
+.ai-page__hero-stats {
+  margin-top: 14px;
+}
+
+.ai-page__stat-card {
+  padding: 16px;
+  border-radius: 18px;
+}
+
+.ai-page__stat-card--accent {
+  background: rgba(34, 197, 94, 0.09);
+  border-color: rgba(34, 197, 94, 0.22);
+}
+
+.ai-page__stat-value {
+  margin-top: 10px;
+  font-size: 32px;
+  line-height: 0.95;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.ai-page__stat-value--compact {
+  font-size: 24px;
+}
+
+.ai-page__stat-note {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgba(226, 232, 240, 0.64);
+}
+
+.ai-page__premium-gate {
+  margin-top: 24px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.ai-page__premium-title,
+.ai-page__side-card-title,
+.ai-page__generation-meta-title,
+.ai-page__coach-brief-title,
+.ai-page__coach-insight-title,
+.ai-page__next-step-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(240, 253, 244, 0.96);
+}
+
+.ai-page__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(290px, 0.7fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.ai-page__section-head,
+.ai-page__draft-head,
+.ai-page__next-step-head,
+.ai-page__exercise-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ai-page__section-title {
+  margin-top: 10px;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.ai-page__section-kicker {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(226, 232, 240, 0.78);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ai-page__live-preview {
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 20px;
+  border-color: rgba(34, 197, 94, 0.16);
+  background:
+    linear-gradient(180deg, rgba(10, 18, 12, 0.92), rgba(8, 14, 10, 0.84));
+}
+
+.ai-page__live-preview-title {
+  margin-top: 10px;
+  font-size: 22px;
+  line-height: 1.02;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.ai-page__live-preview-copy {
+  margin-top: 10px;
+  max-width: 760px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.ai-page__live-preview-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ai-page__live-preview-card {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 13px;
+  line-height: 1.75;
+  color: rgba(226, 232, 240, 0.82);
+}
+
+.ai-page__mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.ai-page__form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ai-page__field--full {
+  grid-column: 1 / -1;
+}
+
+.ai-page__field-label {
+  margin-bottom: 8px;
+}
+
+.ai-page__mode-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-height: 132px;
+  padding: 16px;
+  border-radius: 18px;
+  text-align: left;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.ai-page__mode-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(34, 197, 94, 0.18);
+}
+
+.ai-page__mode-card.is-active {
+  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.1);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.12), 0 16px 34px rgba(0, 0, 0, 0.18);
+}
+
+.ai-page__mode-icon,
+.ai-page__coach-brief-icon,
+.ai-page__exercise-index {
+  display: grid;
+  place-items: center;
+  background: rgba(34, 197, 94, 0.1);
+  color: rgba(134, 239, 172, 0.95);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+}
+
+.ai-page__mode-icon,
+.ai-page__coach-brief-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 14px;
+}
+
+.ai-page__mode-title,
+.ai-page__draft-title,
+.ai-page__exercise-name,
+.ai-page__side-title,
+.ai-page__result-title {
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.ai-page__mode-title {
+  font-size: 16px;
+}
+
+.ai-page__mode-subtitle,
+.ai-page__coach-brief-copy,
+.ai-page__result-subtitle,
+.ai-page__generation-meta-copy,
+.ai-page__draft-copy,
+.ai-page__exercise-meta,
+.ai-page__exercise-technique,
+.ai-page__next-step-copy,
+.ai-page__next-step-card-copy {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.ai-page__mode-subtitle {
+  margin-top: 8px;
+  color: rgba(226, 232, 240, 0.66);
+}
+
+.ai-page__textarea {
+  min-height: 96px;
+  resize: vertical;
+  padding-top: 14px;
+}
+
+.ai-page__coach-brief,
+.ai-page__coach-insight,
+.ai-page__generation-meta,
+.ai-page__next-step {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 18px;
+}
+
+.ai-page__coach-brief {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.ai-page__error-box {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  background: rgba(239, 68, 68, 0.08);
+  color: #fecaca;
+  font-size: 13px;
+}
+
+.ai-page__status-box {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  background: rgba(34, 197, 94, 0.08);
+  color: rgba(220, 252, 231, 0.96);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.ai-page__helper-note {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.75;
+  color: rgba(226, 232, 240, 0.6);
+}
+
+.ai-page__primary-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding-inline: 18px 22px;
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.14),
+    0 14px 28px rgba(34, 197, 94, 0.16),
+    0 0 22px rgba(34, 197, 94, 0.12);
+}
+
+.ai-page__primary-cta:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.18),
+    0 18px 34px rgba(34, 197, 94, 0.18),
+    0 0 28px rgba(34, 197, 94, 0.16);
+}
+
+.ai-page__primary-cta-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(8, 15, 10, 0.16);
+}
+
+.ai-page__side-title {
+  margin-top: 8px;
+  font-size: 24px;
+  line-height: 1.04;
+}
+
+.ai-page__side-card,
+.ai-page__draft-card,
+.ai-page__exercise-card {
+  padding: 16px;
+  border-radius: 18px;
+}
+
+.ai-page__result {
+  margin-top: 18px;
+  border-radius: 24px;
+}
+
+.ai-page__result-title {
+  margin-top: 8px;
+  font-size: 32px;
+  line-height: 0.98;
+}
+
+.ai-page__result-value {
+  margin-top: 10px;
+  max-width: 720px;
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(187, 247, 208, 0.88);
+}
+
+.ai-page__result-signature {
+  margin-top: 10px;
+  max-width: 720px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: rgba(226, 232, 240, 0.62);
+}
+
+.ai-page__generation-meta.is-fallback {
+  border-color: rgba(250, 204, 21, 0.24);
+  background: rgba(250, 204, 21, 0.08);
+}
+
+.ai-page__result-identity {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ai-page__result-identity-card,
+.ai-page__next-step-card {
+  padding: 14px;
+  border-radius: 18px;
+}
+
+.ai-page__result-identity-value {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: 800;
+  color: rgba(248, 250, 252, 0.95);
+}
+
+.ai-page__next-step-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ai-page__draft-grid {
+  margin-top: 18px;
+}
+
+.ai-page__draft-title {
+  font-size: 20px;
+  line-height: 1.05;
+}
+
+.ai-page__exercise-index {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.ai-page__exercise-name {
+  font-size: 16px;
+  line-height: 1.1;
+}
+
+.ai-page__exercise-technique {
+  margin-top: 10px;
+}
+
+.ai-coach-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.ai-coach-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(700px 280px at 50% 10%, rgba(34, 197, 94, 0.18), transparent 60%),
+    rgba(2, 6, 4, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+.ai-coach-overlay__panel {
+  position: relative;
+  width: min(560px, 92vw);
+  padding: 28px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(180deg, rgba(13, 20, 15, 0.96), rgba(9, 14, 10, 0.94));
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.12),
+    0 24px 60px rgba(0, 0, 0, 0.46),
+    0 0 48px rgba(34, 197, 94, 0.08);
+  overflow: hidden;
+}
+
+.ai-coach-overlay__panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(320px 160px at 20% 0%, rgba(34, 197, 94, 0.13), transparent 70%),
+    radial-gradient(260px 120px at 85% 100%, rgba(34, 197, 94, 0.08), transparent 70%);
+  pointer-events: none;
+}
+
+.ai-coach-overlay__logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  color: rgba(134, 239, 172, 0.98);
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.12),
+    0 0 26px rgba(34, 197, 94, 0.16);
+}
+
+.ai-coach-overlay__eyebrow {
+  position: relative;
+  margin-top: 16px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(134, 239, 172, 0.88);
+}
+
+.ai-coach-overlay__title {
+  position: relative;
+  margin-top: 14px;
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 0.95;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.98);
+  max-width: 420px;
+}
+
+.ai-coach-overlay__support,
+.ai-coach-overlay__message {
+  position: relative;
+  margin-top: 12px;
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.ai-coach-overlay__message {
+  min-height: 52px;
+}
+
+.ai-coach-overlay__progress {
+  position: relative;
+  margin-top: 18px;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ai-coach-overlay__progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.85), rgba(74, 222, 128, 0.98));
+  box-shadow: 0 0 18px rgba(34, 197, 94, 0.22);
+  transition: width 420ms ease;
+}
+
+.ai-coach-overlay__steps,
+.ai-coach-overlay__hints {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.ai-coach-overlay__step,
+.ai-coach-overlay__hint {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(229, 231, 235, 0.62);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.ai-coach-overlay__step.is-active {
+  color: rgba(240, 253, 244, 0.96);
+  border-color: rgba(34, 197, 94, 0.2);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+@media (max-width: 980px) {
+  .ai-page__hero-grid,
+  .ai-page__workspace,
+  .ai-page__mode-grid,
+  .ai-page__form-grid,
+  .ai-page__live-preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-page__title {
+    font-size: 48px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ai-page {
+    padding-top: 132px;
+    padding-bottom: 28px;
+  }
+
+  .ai-page__title {
+    font-size: 38px;
+  }
+
+  .ai-page__section-title,
+  .ai-page__result-title,
+  .ai-page__side-title {
+    font-size: 24px;
+  }
+
+  .ai-page__next-step-grid,
+  .ai-page__result-identity {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-page__hero::after {
+    background-position: 60% center;
+    opacity: 0.3;
+  }
+
+  .ai-coach-overlay__panel {
+    padding: 22px;
+    border-radius: 24px;
+  }
+}

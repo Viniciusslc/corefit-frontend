@@ -2,23 +2,30 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Dumbbell, LogOut } from "lucide-react";
-import { useState } from "react";
+import { Crown, Dumbbell, LogOut, ShieldCheck } from "lucide-react";
+import { useMemo, useState } from "react";
 
-const navItems = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Treinos", href: "/trainings" },
-  { label: "Histórico", href: "/workouts" },
-  { label: "Perfil", href: "/profile" },
-];
+import { clearStoredToken, getAuthSession } from "@/lib/auth-session";
 
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const session = useMemo(() => getAuthSession(), []);
+  const isAdmin = session?.role === "admin";
+  const hasPremium = Boolean(session?.hasPremiumAccess);
+
+  const navItems = [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Treinos", href: "/trainings" },
+    { label: "Historico", href: "/workouts" },
+    { label: "Planos", href: "/planos" },
+    { label: "Perfil", href: "/profile" },
+    ...(isAdmin ? [{ label: "Admin", href: "/admin" }] : []),
+  ];
 
   function logout() {
-    localStorage.removeItem("token");
+    clearStoredToken();
     router.push("/login");
   }
 
@@ -26,7 +33,6 @@ export function Header() {
     <header className="corefit-header">
       <div className="container">
         <div className="d-flex align-items-center justify-content-between" style={{ height: 64 }}>
-          {/* Logo */}
           <div className="d-flex align-items-center gap-2">
             <div
               className="d-inline-flex align-items-center justify-content-center glow"
@@ -40,12 +46,58 @@ export function Header() {
             >
               <Dumbbell size={18} />
             </div>
+
             <div style={{ fontWeight: 900, letterSpacing: -0.3 }}>
               CORE<span style={{ color: "#22c55e" }}>FIT</span>
             </div>
+
+            <div className="d-none d-md-flex align-items-center gap-2" style={{ marginLeft: 10 }}>
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 10px",
+                  borderRadius: 999,
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  border: hasPremium
+                    ? "1px solid rgba(34,197,94,0.24)"
+                    : "1px solid rgba(255,255,255,0.10)",
+                  background: hasPremium ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.05)",
+                  color: hasPremium ? "rgba(134,239,172,0.96)" : "rgba(229,231,235,0.78)",
+                }}
+              >
+                <Crown size={12} />
+                {hasPremium ? "Premium" : "Free"}
+              </span>
+
+              {isAdmin ? (
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "6px 10px",
+                    borderRadius: 999,
+                    fontSize: 11,
+                    fontWeight: 800,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    border: "1px solid rgba(250,204,21,0.20)",
+                    background: "rgba(250,204,21,0.08)",
+                    color: "rgba(253,224,71,0.96)",
+                  }}
+                >
+                  <ShieldCheck size={12} />
+                  Admin
+                </span>
+              ) : null}
+            </div>
           </div>
 
-          {/* Desktop nav */}
           <nav className="d-none d-md-flex align-items-center gap-4">
             {navItems.map((item) => {
               const active = pathname === item.href;
@@ -66,7 +118,6 @@ export function Header() {
             })}
           </nav>
 
-          {/* Desktop logout */}
           <button
             onClick={logout}
             className="btn btn-sm btn-soft d-none d-md-inline-flex align-items-center gap-2"
@@ -75,9 +126,8 @@ export function Header() {
             <span>Sair</span>
           </button>
 
-          {/* Mobile button */}
           <button
-            onClick={() => setMobileMenuOpen((v) => !v)}
+            onClick={() => setMobileMenuOpen((value) => !value)}
             className="btn btn-sm btn-soft d-md-none"
             aria-label="Menu"
           >
@@ -85,10 +135,55 @@ export function Header() {
           </button>
         </div>
 
-        {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="d-md-none py-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
             <div className="d-flex flex-column gap-2">
+              <div className="d-flex align-items-center gap-2" style={{ marginBottom: 8 }}>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "6px 10px",
+                    borderRadius: 999,
+                    fontSize: 11,
+                    fontWeight: 800,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    border: hasPremium
+                      ? "1px solid rgba(34,197,94,0.24)"
+                      : "1px solid rgba(255,255,255,0.10)",
+                    background: hasPremium ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.05)",
+                    color: hasPremium ? "rgba(134,239,172,0.96)" : "rgba(229,231,235,0.78)",
+                  }}
+                >
+                  <Crown size={12} />
+                  {hasPremium ? "Premium" : "Free"}
+                </span>
+
+                {isAdmin ? (
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "6px 10px",
+                      borderRadius: 999,
+                      fontSize: 11,
+                      fontWeight: 800,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      border: "1px solid rgba(250,204,21,0.20)",
+                      background: "rgba(250,204,21,0.08)",
+                      color: "rgba(253,224,71,0.96)",
+                    }}
+                  >
+                    <ShieldCheck size={12} />
+                    Admin
+                  </span>
+                ) : null}
+              </div>
+
               {navItems.map((item) => {
                 const active = pathname === item.href;
                 return (

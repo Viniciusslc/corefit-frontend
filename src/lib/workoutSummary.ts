@@ -2,6 +2,11 @@
 
 type PerformedSet = { reps?: number; weight?: number };
 type PerformedExercise = { order?: number; setsPerformed?: PerformedSet[] };
+type WorkoutLike = {
+  performedExercises?: PerformedExercise[];
+  startedAt?: string;
+  finishedAt?: string;
+};
 
 export type WorkoutSummary = {
   durationMinutes: number | null;
@@ -11,8 +16,9 @@ export type WorkoutSummary = {
 };
 
 const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+const MAX_REASONABLE_WORKOUT_MINUTES = 360;
 
-export function calculateWorkoutSummary(workout: any): WorkoutSummary {
+export function calculateWorkoutSummary(workout: WorkoutLike): WorkoutSummary {
   const performed: PerformedExercise[] = Array.isArray(workout?.performedExercises)
     ? workout.performedExercises
     : [];
@@ -38,9 +44,16 @@ export function calculateWorkoutSummary(workout: any): WorkoutSummary {
   const started = workout?.startedAt ? new Date(workout.startedAt).getTime() : NaN;
   const finished = workout?.finishedAt ? new Date(workout.finishedAt).getTime() : NaN;
 
-  const durationMinutes =
+  const rawDurationMinutes =
     Number.isFinite(started) && Number.isFinite(finished) && finished >= started
       ? Math.round((finished - started) / 60000)
+      : null;
+
+  const durationMinutes =
+    rawDurationMinutes != null &&
+    rawDurationMinutes > 0 &&
+    rawDurationMinutes <= MAX_REASONABLE_WORKOUT_MINUTES
+      ? rawDurationMinutes
       : null;
 
   return {
@@ -59,5 +72,10 @@ export function formatKg(value: number | null | undefined) {
 
 export function formatMin(value: number | null | undefined) {
   if (value == null || !Number.isFinite(value)) return "-";
+  if (value >= 60) {
+    const hours = Math.floor(value / 60);
+    const minutes = value % 60;
+    return minutes > 0 ? `${hours}h ${minutes}min` : `${hours}h`;
+  }
   return `${value} min`;
 }

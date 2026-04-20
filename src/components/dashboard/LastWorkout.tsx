@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Clock3, Dumbbell, Trophy } from "lucide-react";
+
+import { CFSection } from "@/components/corefit/primitives";
 import { apiFetch } from "@/lib/apiFetch";
 import { calculateWorkoutSummary, formatKg, formatMin } from "@/lib/workoutSummary";
 
-/* =========================
-   Types (baseado no SEU JSON real de /workouts)
-========================= */
 type PerformedSet = {
   reps: number;
   weight: number;
@@ -15,21 +15,18 @@ type PerformedSet = {
 type PerformedExercise = {
   exerciseName?: string;
   order?: number | string;
-  targetWeight?: number; // ✅ vem no /workouts
+  targetWeight?: number;
   setsPerformed?: PerformedSet[];
 };
 
 type Workout = {
   id?: string;
   _id?: string;
-
   status?: "active" | "finished";
   trainingId?: string;
   trainingName?: string;
-
   startedAt?: string;
   finishedAt?: string;
-
   performedExercises?: PerformedExercise[];
 };
 
@@ -50,33 +47,30 @@ type LastWorkoutViewModel = {
   highlights: HighlightRow[];
 };
 
-/* =========================
-   Utils
-========================= */
-function safeArr<T>(v: unknown): T[] {
-  return Array.isArray(v) ? (v as T[]) : [];
+function safeArr<T>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : [];
 }
 
 function maxWeight(sets: PerformedSet[]) {
   let max = 0;
-  for (const s of sets) {
-    const w = typeof s?.weight === "number" && Number.isFinite(s.weight) ? s.weight : 0;
-    if (w > max) max = w;
+  for (const set of sets) {
+    const weight = typeof set?.weight === "number" && Number.isFinite(set.weight) ? set.weight : 0;
+    if (weight > max) max = weight;
   }
   return max > 0 ? max : null;
 }
 
 function calcStatus(target: number | null, done: number | null): HighlightStatus {
   if (target == null || done == null) return "none";
-  const eps = 0.0001;
-  if (done > target + eps) return "above";
-  if (Math.abs(done - target) <= eps) return "hit";
+  const epsilon = 0.0001;
+  if (done > target + epsilon) return "above";
+  if (Math.abs(done - target) <= epsilon) return "hit";
   return "below";
 }
 
 function badgeInfo(status: HighlightStatus) {
   if (status === "above") return { text: "Acima", className: "last-badge last-badge-good" };
-  if (status === "hit") return { text: "Bateu", className: "last-badge last-badge-good" };
+  if (status === "hit") return { text: "Meta batida", className: "last-badge last-badge-good" };
   if (status === "below") return { text: "Abaixo", className: "last-badge last-badge-warn" };
   return null;
 }
@@ -87,62 +81,68 @@ function rowClass(status: HighlightStatus) {
   return "last-row";
 }
 
+function trustLabel(durationMinutes: number | null, totalVolumeKg: number | null, highlightCount: number) {
+  if (durationMinutes != null || totalVolumeKg != null || highlightCount > 0) {
+    return "Dados confirmados na sua ultima sessao finalizada.";
+  }
+  return "Resumo ainda parcial. Complete mais registros para liberar mais contexto.";
+}
+
 function toDateLabel(value?: string | null) {
   if (!value) return "-";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
 
   const now = new Date();
   const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const startThat = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const startThatDay = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const diff = Math.round((startToday - startThatDay) / 86400000);
 
-  const diff = Math.round((startToday - startThat) / 86400000);
   if (diff === 0) return "Hoje";
   if (diff === 1) return "Ontem";
-  if (diff > 1 && diff < 7) return `há ${diff} dias`;
-
-  return d.toLocaleDateString();
+  if (diff > 1 && diff < 7) return `ha ${diff} dias`;
+  return date.toLocaleDateString("pt-BR");
 }
 
-/* =========================
-   Mapping
-========================= */
 function mapFromWorkout(workout: Workout): LastWorkoutViewModel {
-  const summary = calculateWorkoutSummary(workout as any);
+  const summary = calculateWorkoutSummary(workout as never);
 
   const performed = safeArr<PerformedExercise>(workout.performedExercises)
-    .map((pe, idx) => {
+    .map((exercise, index) => {
       const orderNum =
-        typeof pe.order === "number" ? pe.order : typeof pe.order === "string" ? Number(pe.order) : NaN;
+        typeof exercise.order === "number"
+          ? exercise.order
+          : typeof exercise.order === "string"
+          ? Number(exercise.order)
+          : Number.NaN;
 
       return {
-        idx,
-        order: Number.isFinite(orderNum) ? orderNum : idx,
-        name: pe.exerciseName?.trim() ? pe.exerciseName.trim() : `Exercício ${idx + 1}`,
+        index,
+        order: Number.isFinite(orderNum) ? orderNum : index,
+        name: exercise.exerciseName?.trim() ? exercise.exerciseName.trim() : `Exercicio ${index + 1}`,
         targetWeight:
-          typeof pe.targetWeight === "number" && Number.isFinite(pe.targetWeight) ? pe.targetWeight : null,
-        setsPerformed: safeArr<PerformedSet>(pe.setsPerformed),
+          typeof exercise.targetWeight === "number" && Number.isFinite(exercise.targetWeight)
+            ? exercise.targetWeight
+            : null,
+        setsPerformed: safeArr<PerformedSet>(exercise.setsPerformed),
       };
     })
     .sort((a, b) => a.order - b.order);
 
   const highlights: HighlightRow[] = performed
-    .map((pe) => {
-      const doneKg = maxWeight(pe.setsPerformed);
+    .map((exercise): HighlightRow | null => {
+      const doneKg = maxWeight(exercise.setsPerformed);
       if (doneKg == null) return null;
 
-      const targetKg = pe.targetWeight;
-      const status = calcStatus(targetKg, doneKg);
-
       return {
-        name: pe.name,
-        targetKg,
+        name: exercise.name,
+        targetKg: exercise.targetWeight,
         doneKg,
-        status,
-      } as HighlightRow;
+        status: calcStatus(exercise.targetWeight, doneKg),
+      };
     })
-    .filter((x): x is HighlightRow => x !== null)
-    .slice(0, 6);
+    .filter((item): item is HighlightRow => item !== null)
+    .slice(0, 3);
 
   return {
     trainingName: workout.trainingName ?? "Treino",
@@ -153,36 +153,33 @@ function mapFromWorkout(workout: Workout): LastWorkoutViewModel {
   };
 }
 
-/* =========================
-   Fetch last workout
-========================= */
 async function fetchLastWorkout(): Promise<Workout | null> {
-  const list = await apiFetch<any>("/workouts");
-  const arr: Workout[] = Array.isArray(list) ? list : Array.isArray(list?.items) ? list.items : [];
+  const list = await apiFetch<unknown>("/workouts");
+  const workouts: Workout[] = Array.isArray(list)
+    ? (list as Workout[])
+    : Array.isArray((list as { items?: Workout[] })?.items)
+    ? ((list as { items: Workout[] }).items ?? [])
+    : [];
 
-  const finished = arr
-    .filter((w) => !!w?.finishedAt)
+  const finished = workouts
+    .filter((workout) => !!workout?.finishedAt)
     .sort((a, b) => new Date(b.finishedAt!).getTime() - new Date(a.finishedAt!).getTime())[0];
 
   return finished ?? null;
 }
 
-/* =========================
-   Component
-========================= */
 export function LastWorkout() {
   const [loading, setLoading] = useState(true);
   const [vm, setVm] = useState<LastWorkoutViewModel | null>(null);
-
-  const hasHighlights = useMemo(() => (vm?.highlights.length ?? 0) > 0, [vm]);
+  const topHighlight = useMemo(() => vm?.highlights[0] ?? null, [vm]);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
 
       try {
-        const w = await fetchLastWorkout();
-        if (w) setVm(mapFromWorkout(w));
+        const workout = await fetchLastWorkout();
+        if (workout) setVm(mapFromWorkout(workout));
         else setVm(null);
       } catch {
         setVm(null);
@@ -190,67 +187,123 @@ export function LastWorkout() {
         setLoading(false);
       }
     }
+
     load();
   }, []);
 
   if (loading) {
     return (
-      <div className="card-dark">
-        <p className="last-workout-title">Último treino</p>
+      <CFSection tone="default" padding="md" className="last-workout-card">
+        <p className="last-workout-title">Ultimo treino</p>
         <div className="text-muted-soft">Carregando...</div>
-      </div>
+      </CFSection>
     );
   }
 
   if (!vm) {
     return (
-      <div className="card-dark">
-        <p className="last-workout-title">Último treino</p>
-        <div className="text-muted-soft">Sem destaques (nenhuma execução registrada).</div>
-      </div>
+      <CFSection tone="default" padding="md" className="last-workout-card">
+        <p className="last-workout-title">Ultimo treino</p>
+        <div className="text-muted-soft">
+          Quando voce terminar sua primeira sessao, os destaques aparecem aqui.
+        </div>
+      </CFSection>
     );
   }
 
   return (
-    <div className="card-dark">
-      <p className="last-workout-title">Último treino</p>
+    <CFSection tone="default" padding="md" className="last-workout-card">
+      <p className="last-workout-title">Ultimo treino</p>
 
-      <h3 className="workout-name">{vm.trainingName}</h3>
-      <p className="workout-date">{vm.label}</p>
+      <div className="last-workout-top">
+        <div>
+          <h3 className="workout-name">{vm.trainingName}</h3>
+          <p className="workout-date">{vm.label}</p>
+        </div>
+        <div className="last-workout-trust">
+          <span className="last-workout-trust-dot" />
+          Sessao validada
+        </div>
+      </div>
 
-      <div className="stats-row">
-        <span className="text-muted-soft">{formatMin(vm.durationMinutes)}</span>
-        <span className="text-muted-soft">{formatKg(vm.totalVolumeKg)}</span>
+      <div className="last-workout-stats-grid">
+        <div className="last-mini-stat">
+          <span className="last-mini-icon">
+            <Clock3 size={14} />
+          </span>
+          <div>
+            <small>Duracao</small>
+            <b>{formatMin(vm.durationMinutes)}</b>
+          </div>
+        </div>
+
+        <div className="last-mini-stat">
+          <span className="last-mini-icon">
+            <Dumbbell size={14} />
+          </span>
+          <div>
+            <small>Volume</small>
+            <b>{formatKg(vm.totalVolumeKg)}</b>
+          </div>
+        </div>
+      </div>
+
+      <div className="last-workout-note">
+        {trustLabel(vm.durationMinutes, vm.totalVolumeKg, vm.highlights.length)}
       </div>
 
       <div className="highlight-section">
         <p className="text-muted-soft" style={{ fontWeight: 700, marginBottom: 10 }}>
-          DESTAQUES
+          DESTAQUE PRINCIPAL
         </p>
 
-        {!hasHighlights && <div className="text-muted-soft">Sem destaques.</div>}
+        {topHighlight ? (
+          <div className="last-spotlight">
+            <div className="last-spotlight-head">
+              <div className="last-spotlight-title">
+                <span className="last-mini-icon">
+                  <Trophy size={14} />
+                </span>
+                <b>{topHighlight.name}</b>
+              </div>
+              {badgeInfo(topHighlight.status) && (
+                <span className={badgeInfo(topHighlight.status)!.className}>
+                  {badgeInfo(topHighlight.status)!.text}
+                </span>
+              )}
+            </div>
 
-        {hasHighlights && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {vm.highlights.map((h, i) => {
-              const b = badgeInfo(h.status);
+            <div className="last-row-sub">
+              <span>
+                Meta: <b>{topHighlight.targetKg ?? "-"}</b>kg
+              </span>
+              <span>
+                Feito: <b>{topHighlight.doneKg ?? "-"}</b>kg
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-muted-soft">Sem destaques ainda.</div>
+        )}
 
+        {vm.highlights.length > 1 && (
+          <div className="last-highlight-list">
+            {vm.highlights.slice(1).map((highlight, index) => {
+              const badge = badgeInfo(highlight.status);
               return (
-                <div key={`${h.name}-${i}`} className={rowClass(h.status)}>
+                <div key={`${highlight.name}-${index}`} className={rowClass(highlight.status)}>
                   <div className="last-row-head">
                     <div className="last-row-title">
-                      <b>{h.name}</b>
+                      <b>{highlight.name}</b>
                     </div>
-
-                    {b && <span className={b.className}>{b.text}</span>}
+                    {badge && <span className={badge.className}>{badge.text}</span>}
                   </div>
-
                   <div className="last-row-sub">
                     <span>
-                      Meta: <b>{h.targetKg ?? "-"}</b>kg
+                      Meta: <b>{highlight.targetKg ?? "-"}</b>kg
                     </span>
                     <span>
-                      Feito: <b>{h.doneKg ?? "-"}</b>kg
+                      Feito: <b>{highlight.doneKg ?? "-"}</b>kg
                     </span>
                   </div>
                 </div>
@@ -259,6 +312,6 @@ export function LastWorkout() {
           </div>
         )}
       </div>
-    </div>
+    </CFSection>
   );
 }

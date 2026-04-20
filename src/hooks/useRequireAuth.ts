@@ -3,42 +3,14 @@
 import { useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/apiFetch";
-
-function decodeJwtPayload(token: string): any | null {
-  try {
-    const payload = token.split(".")[1];
-    if (!payload) return null;
-
-    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const json = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-}
-
-function getTokenSafe(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("token");
-}
-
-function clearTokenSafe() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem("token");
-}
+import { clearStoredToken, decodeJwtPayload, getStoredToken } from "@/lib/auth-session";
 
 export function useRequireAuth() {
   const router = useRouter();
 
   // ✅ valida token ao montar
   useEffect(() => {
-    const token = getTokenSafe();
+    const token = getStoredToken();
     if (!token) {
       router.replace("/login");
       return;
@@ -50,7 +22,7 @@ export function useRequireAuth() {
     if (typeof exp === "number") {
       const nowSec = Math.floor(Date.now() / 1000);
       if (exp <= nowSec) {
-        clearTokenSafe();
+        clearStoredToken();
         router.replace("/login");
         return;
       }
@@ -69,7 +41,7 @@ export function useRequireAuth() {
           : undefined;
 
       if (status === 401 || status === 403) {
-        clearTokenSafe();
+        clearStoredToken();
         router.replace("/login");
         return true;
       }
@@ -81,7 +53,7 @@ export function useRequireAuth() {
           : "";
 
       if (msg.toLowerCase().includes("token") && msg.toLowerCase().includes("exp")) {
-        clearTokenSafe();
+        clearStoredToken();
         router.replace("/login");
         return true;
       }
@@ -92,11 +64,11 @@ export function useRequireAuth() {
   );
 
   const logout = useCallback(() => {
-    clearTokenSafe();
+    clearStoredToken();
     router.replace("/login");
   }, [router]);
 
-  const token = getTokenSafe();
+  const token = getStoredToken();
 
   // ✅ AGORA SIM retorna um objeto (não void)
   return { token, logout, handleAuthError };

@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+
+import { CFSection } from "@/components/corefit/primitives";
 import { apiFetch } from "@/lib/apiFetch";
 
 type WorkoutApiItem = {
@@ -16,19 +18,19 @@ type WorkoutApiItem = {
   }[];
 };
 
-function pickId(w: any) {
-  return String(w?.id ?? w?._id ?? "");
+function pickId(workout: any) {
+  return String(workout?.id ?? workout?._id ?? "");
 }
 
-function safeNumber(n: any) {
-  const x = Number(n);
-  return Number.isFinite(x) ? x : 0;
+function safeNumber(value: any) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function dayKeyFromMs(ms: number) {
-  const d = new Date(ms);
-  d.setHours(0, 0, 0, 0);
-  return d.getTime();
+  const date = new Date(ms);
+  date.setHours(0, 0, 0, 0);
+  return date.getTime();
 }
 
 function formatDayLabel(ms: number) {
@@ -37,10 +39,10 @@ function formatDayLabel(ms: number) {
 
 function computeWorkoutVolume(performed?: WorkoutApiItem["performedExercises"]) {
   let volume = 0;
-  for (const ex of performed ?? []) {
-    for (const s of ex.setsPerformed ?? []) {
-      const reps = safeNumber(s.reps);
-      const weight = safeNumber(s.weight);
+  for (const exercise of performed ?? []) {
+    for (const set of exercise.setsPerformed ?? []) {
+      const reps = safeNumber(set.reps);
+      const weight = safeNumber(set.weight);
       if (reps > 0 || weight > 0) volume += reps * weight;
     }
   }
@@ -53,15 +55,15 @@ function computeStreakFromDayKeys(dayKeys: number[]) {
   const todayKey = dayKeyFromMs(Date.now());
   const yesterdayKey = todayKey - 24 * 60 * 60 * 1000;
 
-  // streak só conta se teve treino hoje OU ontem (pra não quebrar “de manhã”)
-  const hasRecent = dayKeys[0] === todayKey || dayKeys[0] === yesterdayKey;
-  if (!hasRecent) return 0;
+  if (dayKeys[0] !== todayKey && dayKeys[0] !== yesterdayKey) {
+    return 0;
+  }
 
   let streak = 1;
-  for (let i = 1; i < dayKeys.length; i++) {
-    const prev = dayKeys[i - 1];
-    const cur = dayKeys[i];
-    if (prev - cur === 24 * 60 * 60 * 1000) streak += 1;
+  for (let index = 1; index < dayKeys.length; index += 1) {
+    const prev = dayKeys[index - 1];
+    const current = dayKeys[index];
+    if (prev - current === 24 * 60 * 60 * 1000) streak += 1;
     else break;
   }
   return streak;
@@ -108,62 +110,61 @@ export function ProgressSection({ refreshKey }: Props) {
 
   const finished = useMemo(() => {
     return (raw ?? [])
-      .filter((w) => (w.status ? w.status === "finished" : true))
-      .map((w) => {
-        const endIso = w.finishedAt ?? w.endedAt ?? w.startedAt;
+      .filter((workout) => (workout.status ? workout.status === "finished" : true))
+      .map((workout) => {
+        const endIso = workout.finishedAt ?? workout.endedAt ?? workout.startedAt;
         const endMs = endIso ? new Date(endIso).getTime() : 0;
         return {
-          id: pickId(w),
+          id: pickId(workout),
           endMs,
-          volume: computeWorkoutVolume(w.performedExercises),
+          volume: computeWorkoutVolume(workout.performedExercises),
         };
       })
-      .filter((w) => !!w.id && Number.isFinite(w.endMs) && w.endMs > 0)
+      .filter((workout) => !!workout.id && Number.isFinite(workout.endMs) && workout.endMs > 0)
       .sort((a, b) => b.endMs - a.endMs);
   }, [raw]);
 
-  // Semana atual (seg -> dom)
   const week = useMemo(() => {
     const now = new Date();
     const today0 = new Date(now);
     today0.setHours(0, 0, 0, 0);
 
-    const day = today0.getDay(); // 0 dom .. 6 sab
-    const diffToMonday = (day + 6) % 7; // dom->6, seg->0...
+    const day = today0.getDay();
+    const diffToMonday = (day + 6) % 7;
     const monday = new Date(today0);
     monday.setDate(today0.getDate() - diffToMonday);
 
-    const days: number[] = Array.from({ length: 7 }).map((_, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      d.setHours(0, 0, 0, 0);
-      return d.getTime();
+    const days: number[] = Array.from({ length: 7 }).map((_, index) => {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + index);
+      date.setHours(0, 0, 0, 0);
+      return date.getTime();
     });
 
     const byDay = new Map<number, { volume: number; workouts: number }>();
-    for (const d of days) byDay.set(d, { volume: 0, workouts: 0 });
+    for (const dayKey of days) byDay.set(dayKey, { volume: 0, workouts: 0 });
 
-    for (const w of finished) {
-      const k = dayKeyFromMs(w.endMs);
-      if (byDay.has(k)) {
-        const cur = byDay.get(k)!;
-        cur.volume += w.volume;
-        cur.workouts += 1;
-        byDay.set(k, cur);
+    for (const workout of finished) {
+      const key = dayKeyFromMs(workout.endMs);
+      if (byDay.has(key)) {
+        const current = byDay.get(key)!;
+        current.volume += workout.volume;
+        current.workouts += 1;
+        byDay.set(key, current);
       }
     }
 
-    const series = days.map((d) => ({
-      dayKey: d,
-      label: formatDayLabel(d),
-      volume: Math.round(byDay.get(d)?.volume ?? 0),
-      workouts: byDay.get(d)?.workouts ?? 0,
-      isToday: d === dayKeyFromMs(Date.now()),
+    const series = days.map((dateKey) => ({
+      dayKey: dateKey,
+      label: formatDayLabel(dateKey),
+      volume: Math.round(byDay.get(dateKey)?.volume ?? 0),
+      workouts: byDay.get(dateKey)?.workouts ?? 0,
+      isToday: dateKey === dayKeyFromMs(Date.now()),
     }));
 
-    const totalVolume = series.reduce((acc, x) => acc + x.volume, 0);
-    const totalWorkouts = series.reduce((acc, x) => acc + x.workouts, 0);
-    const maxVol = Math.max(1, ...series.map((x) => x.volume));
+    const totalVolume = series.reduce((total, item) => total + item.volume, 0);
+    const totalWorkouts = series.reduce((total, item) => total + item.workouts, 0);
+    const maxVol = Math.max(1, ...series.map((item) => item.volume));
 
     return { series, totalVolume, totalWorkouts, maxVol };
   }, [finished]);
@@ -172,11 +173,11 @@ export function ProgressSection({ refreshKey }: Props) {
     const uniqueDaysDesc: number[] = [];
     const seen = new Set<number>();
 
-    for (const w of finished) {
-      const k = dayKeyFromMs(w.endMs);
-      if (!seen.has(k)) {
-        seen.add(k);
-        uniqueDaysDesc.push(k);
+    for (const workout of finished) {
+      const key = dayKeyFromMs(workout.endMs);
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueDaysDesc.push(key);
       }
     }
 
@@ -184,7 +185,7 @@ export function ProgressSection({ refreshKey }: Props) {
   }, [finished]);
 
   return (
-    <div className="card-dark fade-in-soft" style={{ padding: 16 }}>
+    <CFSection tone="default" padding="md" className="fade-in-soft">
       <div
         style={{
           display: "flex",
@@ -195,24 +196,23 @@ export function ProgressSection({ refreshKey }: Props) {
         }}
       >
         <div>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>Evolução (semana)</div>
+          <div style={{ fontWeight: 900, fontSize: 16 }}>Evolucao (semana)</div>
           <div className="text-muted-soft" style={{ marginTop: 4 }}>
-            Semana atual (seg → dom): streak, volume e tendência.
+            Semana atual (seg {"->"} dom): streak, volume e tendencia.
           </div>
         </div>
 
         <Link className="history-link" href="/workouts" style={{ whiteSpace: "nowrap" }}>
-          Ver histórico <span className="history-arrow">›</span>
+          Ver historico <span className="history-arrow">›</span>
         </Link>
       </div>
 
       {loading ? (
         <div className="text-muted-soft" style={{ marginTop: 12 }}>
-          Carregando evolução…
+          Carregando evolucao...
         </div>
       ) : (
         <>
-          {/* KPIs */}
           <div
             style={{
               display: "grid",
@@ -239,10 +239,9 @@ export function ProgressSection({ refreshKey }: Props) {
             </div>
           </div>
 
-          {/* Gráfico (desktop continua grid; mobile vira scroll via CSS) */}
           <div className="progress-mobile-scroll" style={{ marginTop: 14 }}>
             <div className="text-muted-soft" style={{ fontSize: 12, marginBottom: 8 }}>
-              Volume por dia (seg → dom)
+              Volume por dia (seg {"->"} dom)
             </div>
 
             <div
@@ -254,17 +253,17 @@ export function ProgressSection({ refreshKey }: Props) {
                 alignItems: "end",
               }}
             >
-              {week.series.map((d) => {
-                const ratio = d.volume / week.maxVol;
-                const h = Math.round(ratio * 64);
-                const barH = d.volume > 0 ? Math.max(10, h) : 8;
+              {week.series.map((day) => {
+                const ratio = day.volume / week.maxVol;
+                const height = Math.round(ratio * 64);
+                const barHeight = day.volume > 0 ? Math.max(10, height) : 8;
 
-                const hasVolume = d.volume > 0;
-                const isMax = d.volume === week.maxVol && d.volume > 0;
+                const hasVolume = day.volume > 0;
+                const isMax = day.volume === week.maxVol && day.volume > 0;
 
                 return (
                   <div
-                    key={d.dayKey}
+                    key={day.dayKey}
                     className="progress-day"
                     style={{
                       display: "flex",
@@ -274,10 +273,8 @@ export function ProgressSection({ refreshKey }: Props) {
                     }}
                   >
                     <div
-                      className={`day-card ${d.isToday ? "day-card-active" : ""} ${
-                        isMax ? "day-card-max" : ""
-                      }`}
-                      title={`${d.volume.toLocaleString("pt-BR")} kg • ${d.workouts} treino(s)`}
+                      className={`day-card ${day.isToday ? "day-card-active" : ""} ${isMax ? "day-card-max" : ""}`}
+                      title={`${day.volume.toLocaleString("pt-BR")} kg • ${day.workouts} treino(s)`}
                       style={{
                         width: "100%",
                         height: 78,
@@ -285,28 +282,26 @@ export function ProgressSection({ refreshKey }: Props) {
                         alignItems: "flex-end",
                         justifyContent: "center",
                         borderRadius: 12,
-                        border: d.isToday
+                        border: day.isToday
                           ? "1px solid rgba(34,197,94,0.35)"
                           : "1px solid rgba(255,255,255,0.08)",
-                        background: d.isToday ? "rgba(34,197,94,0.04)" : "rgba(255,255,255,0.03)",
+                        background: day.isToday ? "rgba(34,197,94,0.04)" : "rgba(255,255,255,0.03)",
                         padding: 6,
                         position: "relative",
                         overflow: "hidden",
                       }}
                     >
-                      {/* badge premium */}
                       {hasVolume && (
                         <div className="volume-badge">
-                          {d.volume.toLocaleString("pt-BR")}
+                          {day.volume.toLocaleString("pt-BR")}
                           <span style={{ opacity: 0.6, fontWeight: 700 }}>kg</span>
                         </div>
                       )}
 
-                      {/* Barra (energia) */}
                       <div
                         style={{
                           width: "100%",
-                          height: barH,
+                          height: barHeight,
                           borderRadius: 10,
                           background: hasVolume ? "rgba(34,197,94,0.60)" : "rgba(34,197,94,0.18)",
                           boxShadow: hasVolume
@@ -320,11 +315,11 @@ export function ProgressSection({ refreshKey }: Props) {
                     <div
                       style={{
                         fontSize: 12,
-                        opacity: d.isToday ? 0.95 : 0.75,
-                        fontWeight: d.isToday ? 800 : 600,
+                        opacity: day.isToday ? 0.95 : 0.75,
+                        fontWeight: day.isToday ? 800 : 600,
                       }}
                     >
-                      {d.label}
+                      {day.label}
                     </div>
                   </div>
                 );
@@ -333,6 +328,6 @@ export function ProgressSection({ refreshKey }: Props) {
           </div>
         </>
       )}
-    </div>
+    </CFSection>
   );
 }

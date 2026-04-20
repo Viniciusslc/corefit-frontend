@@ -2,10 +2,11 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "@/lib/apiFetch";
+import { ArrowRight, CalendarDays, Crown, Dumbbell, Play, Zap } from "lucide-react";
 
-import { CFCard } from "@/components/ui/CFCard";
-import { CFButton } from "@/components/ui/CFButton";
+import { apiFetch } from "@/lib/apiFetch";
+import { usePremiumAccess } from "@/hooks/usePremiumAccess";
+import { CFBadge, CFButton, CFSection } from "@/components/corefit/primitives";
 
 type Props = {
   trainingId?: string;
@@ -16,10 +17,7 @@ type Props = {
   onStarted?: () => void;
 };
 
-/* =========================
-   Helpers (JWT -> user name)
-========================= */
-function decodeJwtPayload(token: string): any | null {
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
     const clean = token.replace(/^Bearer\s+/i, "").trim();
     const parts = clean.split(".");
@@ -32,11 +30,11 @@ function decodeJwtPayload(token: string): any | null {
     const json = decodeURIComponent(
       atob(padded)
         .split("")
-        .map((c) => "%" + c.charCodeAt(0).toString(16).padStart(2, "0"))
+        .map((char) => "%" + char.charCodeAt(0).toString(16).padStart(2, "0"))
         .join("")
     );
 
-    return JSON.parse(json);
+    return JSON.parse(json) as Record<string, unknown>;
   } catch {
     return null;
   }
@@ -53,32 +51,29 @@ function getUserNameFromStorage(): string | null {
   if (!token) return null;
 
   const payload = decodeJwtPayload(token);
-
   const name = typeof payload?.name === "string" ? payload.name.trim() : "";
   if (name) return name;
 
   const email = typeof payload?.email === "string" ? payload.email.trim() : "";
-  return email ? email : null;
+  return email || null;
 }
 
-function firstNameFromFullName(full: string | null): string | null {
-  if (!full) return null;
-  const cleaned = full.trim().replace(/\s+/g, " ");
-  if (!cleaned) return null;
-  return cleaned.split(" ")[0] ?? null;
+function firstNameFromFullName(fullName: string | null): string | null {
+  if (!fullName) return null;
+  const clean = fullName.trim().replace(/\s+/g, " ");
+  if (!clean) return null;
+  return clean.split(" ")[0] ?? null;
 }
 
-function prettyName(first: string | null): string | null {
-  if (!first) return null;
-
-  const lowered = first.toLowerCase();
-  if (lowered === "usuário" || lowered === "usuario") return "Atleta";
-
-  return first.charAt(0).toUpperCase() + first.slice(1);
+function prettyName(firstName: string | null): string | null {
+  if (!firstName) return null;
+  const lowered = firstName.toLowerCase();
+  if (lowered === "usuario") return "Atleta";
+  return firstName.charAt(0).toUpperCase() + firstName.slice(1);
 }
 
 function pickEmoji() {
-  const emojis = ["😁", "💪", "🔥", "🚀", "🏋️‍♂️", "😎", "⚡", "🥇", "👊", "🤝"];
+  const emojis = ["💪", "🔥", "⚡", "🥇", "🚀", "🏋️", "👏"];
   return emojis[Math.floor(Math.random() * emojis.length)];
 }
 
@@ -91,14 +86,20 @@ export function HeroWorkout({
   onStarted,
 }: Props) {
   const router = useRouter();
+  const { hasPremiumAccess } = usePremiumAccess();
 
   const greetingName = useMemo(() => {
-    const full = getUserNameFromStorage();
-    const first = firstNameFromFullName(full);
-    return prettyName(first);
+    const fullName = getUserNameFromStorage();
+    const firstName = firstNameFromFullName(fullName);
+    return prettyName(firstName);
   }, []);
 
   const emoji = useMemo(() => pickEmoji(), []);
+  const ctaLabel = isActive ? "Continuar treino" : "Iniciar treino";
+  const helperTitle = trainingId ? workoutName : "Crie um treino para comecar";
+  const helperSubtitle = trainingId
+    ? `${workoutType} • ${exerciseCount} exercicios`
+    : "Monte seu primeiro treino e volte para acompanhar sua consistencia.";
 
   async function onStart() {
     if (isActive) {
@@ -107,45 +108,131 @@ export function HeroWorkout({
     }
 
     if (!trainingId) {
-      alert("Nenhum treino selecionado para iniciar.");
+      router.push("/trainings");
       return;
     }
 
     await apiFetch(`/workouts/start/${trainingId}`, { method: "POST" });
 
     if (onStarted) onStarted();
-    else router.push("/workouts/active");
+    router.push("/workouts/active");
   }
 
   return (
-    <CFCard
-      className="card-hero p-4 p-md-5 hero-animate hero-delay-1"
-      style={{
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      <div className="d-flex align-items-center gap-2 mb-2">
-        <span className="badge badge-today">HOJE</span>
+    <CFSection className="card-hero hero-card-shell p-4 p-md-5 hero-animate hero-delay-1">
+      <div className="hero-top-row">
+        <div className="d-flex align-items-center gap-2 mb-2">
+          <CFBadge className="badge-today">Hoje</CFBadge>
+        </div>
       </div>
 
-      <h2 className="h3 fw-bold mb-1">
-        Olá,{" "}
-        <span style={{ color: "var(--cf-green)" }}>
-          {greetingName ?? "Atleta"}
-        </span>{" "}
-        {emoji} Pronto para mais um treino?
-      </h2>
+      <div className="hero-layout">
+        <div className="hero-copy">
+          <h2 className="hero-free-title">
+            Ola, <span className="hero-free-name">{greetingName ?? "Atleta"}</span> {emoji}
+          </h2>
 
-      <div className="text-muted-soft">
-        <b>{workoutType}</b> • {workoutName} • {exerciseCount} exercícios
-      </div>
+          <p className="hero-free-subtitle">
+            {isActive
+              ? "Seu treino ainda esta aberto. Retome agora e mantenha o ritmo."
+              : "Tudo pronto para mais uma sessao. Entre sabendo o que fazer e o que superar."}
+          </p>
 
-      <div className="mt-3" style={{ position: "relative", zIndex: 2 }}>
-        <CFButton onClick={onStart}>
-          ▶ Iniciar treino
-        </CFButton>
+          <div className="hero-free-details">
+            <div className="hero-free-detail">
+              <div className="hero-free-detail-main">
+                <div className="hero-free-detail-copy">
+                  <span className="hero-free-detail-kicker">
+                    <Dumbbell size={12} strokeWidth={2} />
+                    Foco atual
+                  </span>
+                  <b>{helperTitle}</b>
+                  <span>{helperSubtitle}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="hero-free-detail">
+              <div className="hero-free-detail-main">
+                <div className="hero-free-detail-copy">
+                  <span className="hero-free-detail-kicker">
+                    <CalendarDays size={12} strokeWidth={2} />
+                    Proximo passo
+                  </span>
+                  <b>{isActive ? "Treino em andamento" : "Proxima acao"}</b>
+                  <span>
+                    {isActive
+                      ? "Voltar para o treino ativo"
+                      : trainingId
+                      ? "Entrar, registrar e seguir sua meta semanal"
+                      : "Criar um treino para desbloquear o painel completo"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="hero-side">
+          <div className="hero-side-card">
+            <div className="hero-side-kicker">
+              {hasPremiumAccess ? <Crown size={14} /> : <Zap size={14} />}
+              {hasPremiumAccess ? "Resumo premium" : "Resumo rapido"}
+            </div>
+
+            <div className="hero-side-grid">
+              <div className="hero-side-stat">
+                <span>Treino de hoje</span>
+                <b>{trainingId ? workoutName : "Monte seu primeiro treino"}</b>
+                <small>
+                  {trainingId
+                    ? helperSubtitle
+                    : "Organize seu plano para liberar a proxima sessao."}
+                </small>
+              </div>
+
+              <div className="hero-side-stat">
+                <span>{hasPremiumAccess ? "Plano" : "Status"}</span>
+                <b>
+                  {hasPremiumAccess
+                    ? "Premium ativo"
+                    : isActive
+                    ? "Em andamento"
+                    : trainingId
+                    ? `${exerciseCount} exercicios`
+                    : "Painel inicial"}
+                </b>
+                <small>
+                  {hasPremiumAccess
+                    ? "IA Coach, planos e camada premium ja conectados ao seu acesso."
+                    : isActive
+                    ? "Seu treino ja comecou. Volte e registre o restante."
+                    : trainingId
+                    ? `${workoutType} pronto para execucao`
+                    : "Crie um treino para comecar a medir sua consistencia."}
+                </small>
+              </div>
+            </div>
+
+            <div className="hero-side-actions">
+              <CFButton onClick={onStart} className="d-inline-flex align-items-center gap-2">
+                <Play size={15} />
+                {ctaLabel}
+              </CFButton>
+
+              <CFButton
+                type="button"
+                variant="secondary"
+                className="d-inline-flex align-items-center gap-2"
+                onClick={() => router.push(hasPremiumAccess ? "/trainings/ai" : "/trainings")}
+              >
+                {hasPremiumAccess ? "Abrir IA Coach" : "Ver treinos"}
+                <ArrowRight size={15} />
+              </CFButton>
+            </div>
+          </div>
+        </div>
       </div>
-    </CFCard>
+    </CFSection>
   );
 }
