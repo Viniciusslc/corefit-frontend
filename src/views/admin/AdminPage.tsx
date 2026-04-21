@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUpRight,
   ChevronDown,
@@ -16,7 +16,6 @@ import {
   Zap,
 } from "lucide-react";
 
-import Navbar from "@/components/Navbar";
 import { ApiError, apiFetch } from "@/lib/apiFetch";
 
 type AdminOverview = {
@@ -168,6 +167,7 @@ function buildAreaPath(values: number[], width: number, height: number) {
 }
 
 export default function NovaAdminPage() {
+  const feedbackRef = useRef<HTMLElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [overview, setOverview] = useState<AdminOverview | null>(null);
@@ -414,6 +414,7 @@ export default function NovaAdminPage() {
     setActionKey(`password-${userId}`);
     setStatusMessage(null);
     setErrorMessage(null);
+    setTemporaryPassword(null);
 
     try {
       const response = await apiFetch<{ ok: true; temporaryPassword: string }>(
@@ -423,7 +424,13 @@ export default function NovaAdminPage() {
 
       setTemporaryPassword({ userName, password: response.temporaryPassword });
       setStatusMessage("Senha temporaria gerada. Compartilhe por canal seguro e peca troca imediata.");
+      requestAnimationFrame(() => {
+        feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
     } catch (error) {
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        setAccessState("unauthorized");
+      }
       setErrorMessage(error instanceof Error ? error.message : "Nao foi possivel resetar a senha.");
     } finally {
       setActionKey(null);
@@ -443,7 +450,6 @@ export default function NovaAdminPage() {
   if (accessState === "unauthorized") {
     return (
       <main className="min-h-screen bg-[#040404] text-white">
-        <Navbar />
         <div className="mx-auto flex min-h-screen max-w-4xl items-center px-6 pt-24">
           <div className="w-full rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(13,18,15,0.96),rgba(8,9,8,0.92))] p-10 shadow-[0_30px_120px_rgba(0,0,0,0.45)]">
             <div className="inline-flex items-center gap-3 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">
@@ -463,8 +469,6 @@ export default function NovaAdminPage() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#040404] text-white">
-      <Navbar />
-
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-no-repeat"
@@ -578,7 +582,7 @@ export default function NovaAdminPage() {
         </section>
 
         {(statusMessage || errorMessage || temporaryPassword) && (
-          <section className="mt-6 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
+          <section ref={feedbackRef} className="mt-6 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
             <div
               className={`rounded-[1.6rem] border px-5 py-4 text-sm leading-7 ${
                 errorMessage

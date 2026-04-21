@@ -3,9 +3,11 @@
 import "./dashboard.css";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { usePremiumAccess } from "@/hooks/usePremiumAccess";
 import { apiFetch } from "@/lib/apiFetch";
+import { getAuthSession, isAdminSession } from "@/lib/auth-session";
 import { CFBadge, CFSection } from "@/components/corefit/primitives";
 
 import { HeroWorkout } from "@/components/dashboard/HeroWorkout";
@@ -84,8 +86,10 @@ function sortTrainingsStable(list: Training[]) {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   useRequireAuth();
   const { hasPremiumAccess, session } = usePremiumAccess();
+  const isAdmin = isAdminSession(session);
 
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [hasActiveWorkout, setHasActiveWorkout] = useState(false);
@@ -97,7 +101,20 @@ export default function DashboardPage() {
   const [refreshKey, setRefreshKey] = useState(() => String(Date.now()));
 
   useEffect(() => {
+    if (isAdminSession(getAuthSession())) {
+      router.replace("/admin");
+    }
+  }, [router]);
+
+  useEffect(() => {
     let mounted = true;
+
+    if (isAdminSession(getAuthSession())) {
+      setLoading(false);
+      return () => {
+        mounted = false;
+      };
+    }
 
     async function load() {
       setLoading(true);
@@ -166,7 +183,7 @@ export default function DashboardPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [router]);
 
   const nextTraining = useMemo(() => {
     if (!trainings.length) return null;
@@ -209,6 +226,16 @@ export default function DashboardPage() {
       <div className="corefit-bg dashboard-page">
         <div className="corefit-container dashboard-container">
           <div className="card-dark p-4">Carregando dashboard...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAdmin) {
+    return (
+      <div className="corefit-bg dashboard-page">
+        <div className="corefit-container dashboard-container">
+          <div className="card-dark p-4">Abrindo painel admin...</div>
         </div>
       </div>
     );

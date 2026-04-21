@@ -7,6 +7,7 @@ import { Compass, Eye, EyeOff, LineChart, Zap } from "lucide-react";
 
 import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { apiFetch } from "@/lib/apiFetch";
+import { getAuthenticatedHomePath } from "@/lib/auth-session";
 
 type RegisterResponse =
   | { token?: string; access_token?: string; jwt?: string }
@@ -86,7 +87,7 @@ export default function RegisterPage() {
       }
 
       localStorage.setItem("token", token);
-      router.push("/dashboard");
+      router.push(getAuthenticatedHomePath(token));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Erro ao criar conta";
       setError(message);

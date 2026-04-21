@@ -2,10 +2,17 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LogOut } from "lucide-react";
 
 import { CorefitLogo } from "@/components/logo/CorefitLogo";
+import {
+  clearStoredToken,
+  getAuthenticatedHomePath,
+  getAuthSession,
+  isAdminSession,
+  type AuthSession,
+} from "@/lib/auth-session";
 
 const AUTH_CTA_BY_PATH: Record<string, { href: string; label: string }> = {
   "/login": { href: "/register", label: "Criar conta" },
@@ -35,34 +42,51 @@ const privateNav = [
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const [logged, setLogged] = useState(false);
+  const [session, setSession] = useState<AuthSession | null>(null);
 
   const forcePublicShell = PUBLIC_SHELL_PATHS.has(pathname);
   const authCta = AUTH_CTA_BY_PATH[pathname];
+  const logged = !forcePublicShell && !!session;
+  const isAdmin = isAdminSession(session);
   const showDualPublicActions = !logged && !authCta;
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setLogged(!forcePublicShell && !!localStorage.getItem("token"));
-    });
+    function syncSession() {
+      const nextSession = forcePublicShell ? null : getAuthSession();
+      setSession(nextSession);
+    }
 
-    return () => window.cancelAnimationFrame(frame);
+    const frame = window.requestAnimationFrame(syncSession);
+    window.addEventListener("focus", syncSession);
+    window.addEventListener("storage", syncSession);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("focus", syncSession);
+      window.removeEventListener("storage", syncSession);
+    };
   }, [forcePublicShell, pathname]);
 
   function logout() {
-    localStorage.removeItem("token");
-    setLogged(false);
+    clearStoredToken();
+    setSession(null);
     router.push("/login");
   }
 
-  const navItems = logged ? privateNav : publicNav;
+  const navItems = useMemo(() => {
+    if (!logged) return publicNav;
+
+    return isAdmin ? [...privateNav, { label: "Admin", href: "/admin" }] : privateNav;
+  }, [isAdmin, logged]);
+
+  const homeHref = logged ? getAuthenticatedHomePath(session) : "/";
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/76 via-black/52 to-transparent backdrop-blur-[12px]" />
 
       <div className="relative mx-auto flex h-20 max-w-[1380px] items-center justify-between px-5 sm:px-8 lg:px-10">
-        <Link href={logged ? "/dashboard" : "/"} className="shrink-0">
+        <Link href={homeHref} className="shrink-0">
           <div className="rounded-2xl px-2 py-2 transition duration-200 hover:bg-white/[0.04]">
             <CorefitLogo size="md" />
           </div>

@@ -7,6 +7,7 @@ import { BarChart3, Dumbbell, Eye, EyeOff, Flame, LoaderCircle } from "lucide-re
 
 import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { apiFetch } from "@/lib/apiFetch";
+import { getAuthenticatedHomePath } from "@/lib/auth-session";
 
 type LoginResponse =
   | { token?: string; access_token?: string; jwt?: string }
@@ -142,7 +143,7 @@ export default function LoginPage() {
             }
 
             localStorage.setItem("token", token);
-            router.push("/dashboard");
+            router.push(getAuthenticatedHomePath(token));
           } catch (err: unknown) {
             const message = err instanceof Error ? err.message : "Erro ao entrar com Google";
             setError(message);
@@ -229,7 +230,7 @@ export default function LoginPage() {
       }
 
       localStorage.setItem("token", token);
-      router.push("/dashboard");
+      router.push(getAuthenticatedHomePath(token));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Erro ao fazer login";
       setError(message);
