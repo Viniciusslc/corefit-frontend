@@ -30,27 +30,27 @@ type GoogleCodeClient = {
 const LOGIN_HEADLINES: HeroCopy[] = [
   {
     title: "Seu treino continua aqui.",
-    accent: "Sua evolucao tambem.",
+    accent: "Sua evolução também.",
     description:
-      "Seus treinos, suas cargas e sua evolucao ja estao salvos. Faca login, retome o ritmo e continue construindo resultado com constancia.",
+      "Seus treinos, suas cargas e sua evolução já estão salvos. Faça login, retome o ritmo e continue construindo resultado com constância.",
   },
   {
-    title: "O historico ja existe.",
-    accent: "Agora entra o proximo avanco.",
+    title: "O histórico já existe.",
+    accent: "Agora entra o próximo avanço.",
     description:
-      "O Corefit guarda o que voce fez para deixar claro o que precisa superar. Entre e continue evoluindo com direcao, nao no improviso.",
+      "O Corefit guarda o que você fez para deixar claro o que precisa superar. Entre e continue evoluindo com direção, não no improviso.",
   },
   {
-    title: "Constancia vira resultado.",
-    accent: "O proximo treino comeca aqui.",
+    title: "Constância vira resultado.",
+    accent: "O próximo treino começa aqui.",
     description:
-      "Carga, volume e consistencia nao podem depender da memoria. Volte, registre e transforme disciplina em progresso visivel.",
+      "Carga, volume e consistência não podem depender da memória. Volte, registre e transforme disciplina em progresso visível.",
   },
   {
     title: "Cada treino conta.",
-    accent: "O proximo pode ser o melhor.",
+    accent: "O próximo pode ser o melhor.",
     description:
-      "Seu historico esta pronto para mostrar o que ja mudou. Entre e continue acumulando resultado do jeito certo.",
+      "Seu histórico está pronto para mostrar o que já mudou. Entre e continue acumulando resultado do jeito certo.",
   },
 ];
 
@@ -104,7 +104,7 @@ export default function LoginPage() {
 
   function ensureGoogleClient() {
     if (!googleClientId) {
-      return Promise.reject(new Error("Login com Google ainda nao esta configurado neste ambiente."));
+      return Promise.reject(new Error("Login com Google ainda não está configurado neste ambiente."));
     }
 
     if (window.google?.accounts?.oauth2?.initCodeClient && googleClientRef.current) {
@@ -113,7 +113,7 @@ export default function LoginPage() {
 
     const initClient = () => {
       if (!window.google?.accounts?.oauth2?.initCodeClient) {
-        throw new Error("O Google nao ficou disponivel para login.");
+        throw new Error("O Google não ficou disponível para login.");
       }
 
       googleClientRef.current = window.google.accounts.oauth2.initCodeClient({
@@ -123,7 +123,7 @@ export default function LoginPage() {
         callback: async (response: GoogleCodeResponse) => {
           if (!response?.code) {
             setGoogleLoading(false);
-            setError("Nao foi possivel concluir o login com Google.");
+            setError("Não foi possível concluir o login com Google.");
             return;
           }
 
@@ -139,7 +139,7 @@ export default function LoginPage() {
                 : resp?.access_token || resp?.token || resp?.jwt;
 
             if (!token) {
-              throw new Error("Token nao retornado no login Google.");
+              throw new Error("Token não retornado no login com Google.");
             }
 
             localStorage.setItem("token", token);
@@ -153,7 +153,7 @@ export default function LoginPage() {
         },
         error_callback: () => {
           setGoogleLoading(false);
-          setError("Login com Google cancelado ou nao autorizado.");
+          setError("Login com Google cancelado ou não autorizado.");
         },
       });
     };
@@ -226,7 +226,7 @@ export default function LoginPage() {
           : resp?.access_token || resp?.token || resp?.jwt;
 
       if (!token) {
-        throw new Error("Token nao retornado.");
+        throw new Error("Token não retornado.");
       }
 
       localStorage.setItem("token", token);
@@ -243,7 +243,7 @@ export default function LoginPage() {
     setError(null);
 
     if (!googleClientId) {
-      setError("Login com Google ainda nao esta configurado neste ambiente.");
+      setError("Login com Google ainda não está configurado neste ambiente.");
       return;
     }
 
@@ -253,7 +253,7 @@ export default function LoginPage() {
       await ensureGoogleClient();
 
       if (!googleClientRef.current) {
-        throw new Error("O carregamento do Google ainda nao terminou. Tente novamente.");
+        throw new Error("O carregamento do Google ainda não terminou. Tente novamente.");
       }
 
       googleClientRef.current.requestCode();
@@ -270,20 +270,20 @@ export default function LoginPage() {
     <AuthSplitLayout
       backgroundImage="/images/auth/hero-login.webp"
       backgroundPosition="center 20%"
-      heroEyebrow="Historico, clareza, consistencia"
+      heroEyebrow="Histórico, clareza, consistência"
       heroTitle={heroCopy.title}
       heroAccent={heroCopy.accent}
       heroDescription={heroCopy.description}
       heroMetrics={[
-        { value: "128", label: "sessoes registradas no ultimo ciclo" },
-        { value: "+16,2 kg", label: "ganho medio na carga principal" },
-        { value: "92%", label: "ritmo mantido entre uma sessao e outra" },
+        { value: "128", label: "sessões registradas no último ciclo" },
+        { value: "+16,2 kg", label: "ganho médio na carga principal" },
+        { value: "92%", label: "ritmo mantido entre uma sessão e outra" },
       ]}
       heroHighlights={[
         {
           icon: BarChart3,
           title: "Progresso real",
-          description: "Acompanhe suas cargas e performance com historico claro.",
+          description: "Acompanhe suas cargas e sua performance com histórico claro.",
         },
         {
           icon: Dumbbell,
@@ -292,14 +292,14 @@ export default function LoginPage() {
         },
         {
           icon: Flame,
-          title: "Constancia",
-          description: "Menos treino perdido, mais continuidade entre sessoes.",
+          title: "Constância",
+          description: "Menos treino perdido, mais continuidade entre sessões.",
         },
       ]}
-      heroNote="Seu treino nao precisa recomecar no improviso toda vez que voce volta. O Corefit retoma de onde sua evolucao parou."
+      heroNote="Seu treino não precisa recomeçar no improviso toda vez que você volta. O Corefit retoma de onde a sua evolução parou."
       panelBadge="Acesso Corefit"
       panelTitle="Bem-vindo de volta"
-      panelDescription="Entre para continuar seu historico com o mesmo padrao visual, a mesma clareza e o mesmo contexto do treino anterior."
+      panelDescription="Entre para continuar seu histórico com o mesmo padrão visual, a mesma clareza e o mesmo contexto do treino anterior."
     >
       {error ? (
         <div className="mb-5 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
@@ -408,11 +408,11 @@ export default function LoginPage() {
       </button>
 
       <p className="mt-4 text-center text-xs leading-5 text-white/40">
-        Seu historico continua salvo e pronto para retomar de onde voce parou.
+        Seu histórico continua salvo e pronto para retomar de onde você parou.
       </p>
 
       <p className="mt-6 text-center text-sm text-zinc-500">
-        Nao tem uma conta?{" "}
+        Não tem uma conta?{" "}
         <Link href="/register" className="font-medium text-green-400 hover:underline">
           Criar conta
         </Link>

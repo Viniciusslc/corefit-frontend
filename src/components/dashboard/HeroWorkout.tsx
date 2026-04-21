@@ -31,7 +31,7 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
       atob(padded)
         .split("")
         .map((char) => "%" + char.charCodeAt(0).toString(16).padStart(2, "0"))
-        .join("")
+        .join(""),
     );
 
     return JSON.parse(json) as Record<string, unknown>;
@@ -96,10 +96,10 @@ export function HeroWorkout({
 
   const emoji = useMemo(() => pickEmoji(), []);
   const ctaLabel = isActive ? "Continuar treino" : "Iniciar treino";
-  const helperTitle = trainingId ? workoutName : "Crie um treino para comecar";
+  const helperTitle = trainingId ? workoutName : "Crie um treino para começar";
   const helperSubtitle = trainingId
-    ? `${workoutType} • ${exerciseCount} exercicios`
-    : "Monte seu primeiro treino e volte para acompanhar sua consistencia.";
+    ? `${workoutType} • ${exerciseCount} exercícios`
+    : "Monte seu primeiro treino e volte para acompanhar sua consistência.";
 
   async function onStart() {
     if (isActive) {
@@ -129,13 +129,13 @@ export function HeroWorkout({
       <div className="hero-layout">
         <div className="hero-copy">
           <h2 className="hero-free-title">
-            Ola, <span className="hero-free-name">{greetingName ?? "Atleta"}</span> {emoji}
+            Olá, <span className="hero-free-name">{greetingName ?? "Atleta"}</span> {emoji}
           </h2>
 
           <p className="hero-free-subtitle">
             {isActive
-              ? "Seu treino ainda esta aberto. Retome agora e mantenha o ritmo."
-              : "Tudo pronto para mais uma sessao. Entre sabendo o que fazer e o que superar."}
+              ? "Seu treino ainda está aberto. Retome agora e mantenha o ritmo."
+              : "Tudo pronto para mais uma sessão. Entre sabendo o que fazer e o que superar."}
           </p>
 
           <div className="hero-free-details">
@@ -157,15 +157,15 @@ export function HeroWorkout({
                 <div className="hero-free-detail-copy">
                   <span className="hero-free-detail-kicker">
                     <CalendarDays size={12} strokeWidth={2} />
-                    Proximo passo
+                    Próximo passo
                   </span>
-                  <b>{isActive ? "Treino em andamento" : "Proxima acao"}</b>
+                  <b>{isActive ? "Treino em andamento" : "Próxima ação"}</b>
                   <span>
                     {isActive
                       ? "Voltar para o treino ativo"
                       : trainingId
-                      ? "Entrar, registrar e seguir sua meta semanal"
-                      : "Criar um treino para desbloquear o painel completo"}
+                        ? "Entrar, registrar e seguir sua meta semanal"
+                        : "Criar um treino para desbloquear o painel completo"}
                   </span>
                 </div>
               </div>
@@ -177,7 +177,7 @@ export function HeroWorkout({
           <div className="hero-side-card">
             <div className="hero-side-kicker">
               {hasPremiumAccess ? <Crown size={14} /> : <Zap size={14} />}
-              {hasPremiumAccess ? "Resumo premium" : "Resumo rapido"}
+              {hasPremiumAccess ? "Resumo premium" : "Resumo rápido"}
             </div>
 
             <div className="hero-side-grid">
@@ -187,7 +187,7 @@ export function HeroWorkout({
                 <small>
                   {trainingId
                     ? helperSubtitle
-                    : "Organize seu plano para liberar a proxima sessao."}
+                    : "Organize seu plano para liberar a próxima sessão."}
                 </small>
               </div>
 
@@ -197,19 +197,19 @@ export function HeroWorkout({
                   {hasPremiumAccess
                     ? "Premium ativo"
                     : isActive
-                    ? "Em andamento"
-                    : trainingId
-                    ? `${exerciseCount} exercicios`
-                    : "Painel inicial"}
+                      ? "Em andamento"
+                      : trainingId
+                        ? `${exerciseCount} exercícios`
+                        : "Painel inicial"}
                 </b>
                 <small>
                   {hasPremiumAccess
-                    ? "IA Coach, planos e camada premium ja conectados ao seu acesso."
+                    ? "IA Coach, planos e camada premium já conectados ao seu acesso."
                     : isActive
-                    ? "Seu treino ja comecou. Volte e registre o restante."
-                    : trainingId
-                    ? `${workoutType} pronto para execucao`
-                    : "Crie um treino para comecar a medir sua consistencia."}
+                      ? "Seu treino já começou. Volte e registre o restante."
+                      : trainingId
+                        ? `${workoutType} pronto para execução`
+                        : "Crie um treino para começar a medir sua consistência."}
                 </small>
               </div>
             </div>

@@ -16,21 +16,21 @@ type RegisterResponse =
 const registerHighlights = [
   {
     icon: Zap,
-    title: "Entrada rapida",
+    title: "Entrada rápida",
     description:
       "Cadastro enxuto, direto e sem atrito logo no primeiro acesso.",
   },
   {
     icon: LineChart,
-    title: "Evolucao visivel",
+    title: "Evolução visível",
     description:
-      "Carga, volume e consistencia viram leitura util desde o inicio.",
+      "Carga, volume e consistência viram leitura útil desde o início.",
   },
   {
     icon: Compass,
     title: "Treino com contexto",
     description:
-      "Voce entra com uma base pronta para treinar com mais direcao.",
+      "Você entra com uma base pronta para treinar com mais direção.",
   },
 ];
 
@@ -83,7 +83,7 @@ export default function RegisterPage() {
           : resp?.access_token || resp?.token || resp?.jwt;
 
       if (!token) {
-        throw new Error("Token nao retornado no cadastro.");
+        throw new Error("Token não retornado no cadastro.");
       }
 
       localStorage.setItem("token", token);
@@ -100,14 +100,14 @@ export default function RegisterPage() {
     <AuthSplitLayout
       backgroundImage="/images/hero-register.png"
       backgroundPosition="center 14%"
-      heroEyebrow="Registro, leitura, evolucao"
+      heroEyebrow="Registro, leitura, evolução"
       heroTitle="Treinar melhor"
-      heroAccent="comeca com um sistema claro."
-      heroDescription="O Corefit foi feito para quem quer mais do que marcar treino como concluido. Aqui voce entra com estrutura, registra o que fez e comeca a construir evolucao com direcao."
+      heroAccent="começa com um sistema claro."
+      heroDescription="O Corefit foi feito para quem quer mais do que marcar treino como concluído. Aqui você entra com estrutura, registra o que fez e começa a construir evolução com direção."
       heroMetrics={[
-        { value: "Cadastro limpo", label: "entrada objetiva para comecar sem friccao." },
-        { value: "Meta semanal", label: "voce ja entra com uma rotina inicial definida." },
-        { value: "Base pronta", label: "historico e organizacao desde o primeiro treino." },
+        { value: "Cadastro limpo", label: "entrada objetiva para começar sem fricção." },
+        { value: "Meta semanal", label: "você já entra com uma rotina inicial definida." },
+        { value: "Base pronta", label: "histórico e organização desde o primeiro treino." },
       ]}
       heroMetricsColumns={3}
       heroHighlightsColumns={3}
@@ -171,7 +171,7 @@ export default function RegisterPage() {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="Minimo de 6 caracteres"
+              placeholder="Mínimo de 6 caracteres"
               autoComplete="new-password"
               className="w-full rounded-[1.2rem] border border-white/10 bg-white/5 px-5 py-4 pr-14 text-base text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] placeholder:text-zinc-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
             />
@@ -185,17 +185,17 @@ export default function RegisterPage() {
             </button>
           </div>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
-            Use pelo menos 6 caracteres para comecar com seguranca.
+            Use pelo menos 6 caracteres para começar com segurança.
           </p>
         </div>
 
         <div className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.018))] p-4 shadow-xl shadow-black/40 transition-all duration-300 hover:scale-[1.02] hover:border-white/20">
           <div className="mb-1 text-sm font-semibold text-zinc-200">
-            Quantos dias por semana voce quer manter como meta?
+            Quantos dias por semana você quer manter como meta?
           </div>
           <p className="mb-4 text-xs leading-5 text-zinc-500">
-            Isso ajuda a comecar o app com uma meta simples e realista para sua rotina.
-            Depois voce pode ajustar no perfil.
+            Isso ajuda a começar o app com uma meta simples e realista para a sua rotina.
+            Depois você pode ajustar no perfil.
           </p>
 
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -226,12 +226,12 @@ export default function RegisterPage() {
           disabled={loading}
           className="inline-flex w-full items-center justify-center rounded-[1.35rem] bg-green-500 px-6 py-4 text-lg font-semibold text-black shadow-lg shadow-green-500/20 transition-all duration-300 hover:scale-[1.02] hover:bg-green-400 hover:shadow-green-500/40 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? "Criando conta..." : "Comecar minha evolucao"}
+          {loading ? "Criando conta..." : "Começar minha evolução"}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-zinc-500">
-        Ja tem uma conta?{" "}
+        Já tem uma conta?{" "}
         <Link href="/login" className="font-medium text-green-400 hover:underline">
           Entrar
         </Link>

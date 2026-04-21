@@ -100,7 +100,7 @@ function getTargetStatus(
 
   const avg = getPerformedAvgWeight(sets);
   if (avg <= 0) {
-    return { label: "Sem execucao", diff: 0, avg: 0 };
+    return { label: "Sem execução", diff: 0, avg: 0 };
   }
 
   const diff = avg - targetWeight;
@@ -140,16 +140,16 @@ function formatElapsed(ms: number) {
 
 function getPrimaryCtaLabel(doneSets: number, totalSets: number) {
   if (!totalSets) return "Aguardar treino";
-  if (doneSets <= 0) return "Comecar treino";
+  if (doneSets <= 0) return "Começar treino";
   if (doneSets >= totalSets) return "Finalizar treino";
   return `Continuar (${doneSets}/${totalSets})`;
 }
 
 function getProgressSummary(doneSets: number, totalSets: number) {
-  if (!totalSets) return "Nenhuma serie disponivel";
-  if (doneSets <= 0) return `0 de ${totalSets} series concluidas`;
-  if (doneSets >= totalSets) return `${totalSets} de ${totalSets} series concluidas`;
-  return `${doneSets} de ${totalSets} series concluidas`;
+  if (!totalSets) return "Nenhuma série disponível";
+  if (doneSets <= 0) return `0 de ${totalSets} séries concluídas`;
+  if (doneSets >= totalSets) return `${totalSets} de ${totalSets} séries concluídas`;
+  return `${doneSets} de ${totalSets} séries concluídas`;
 }
 
 function getGlobalGuidance(
@@ -161,7 +161,7 @@ function getGlobalGuidance(
   if (!totalSets || !snapshot.length) {
     return {
       label: "Treino em preparo",
-      text: "Assim que o treino iniciar, esta tela vira seu painel de execucao em tempo real.",
+      text: "Assim que o treino iniciar, esta tela vira seu painel de execução em tempo real.",
     };
   }
 
@@ -172,21 +172,21 @@ function getGlobalGuidance(
     if (pendingIndex >= 0) {
       if (doneSets <= 0) {
         return {
-          label: "Primeira acao",
-          text: `Comece por ${exercise.name} e registre a serie ${pendingIndex + 1} para ativar a leitura do treino.`,
+          label: "Primeira ação",
+          text: `Comece por ${exercise.name} e registre a série ${pendingIndex + 1} para ativar a leitura do treino.`,
         };
       }
 
       return {
-        label: "Proxima acao",
-        text: `${exercise.name}: avance para a serie ${pendingIndex + 1} e mantenha o ritmo que voce ja abriu.`,
+        label: "Próxima ação",
+        text: `${exercise.name}: avance para a série ${pendingIndex + 1} e mantenha o ritmo que você já abriu.`,
       };
     }
   }
 
   return {
     label: "Tudo pronto",
-    text: "Tudo registrado. Revise a sessao e finalize para salvar seu historico completo.",
+    text: "Tudo registrado. Revise a sessão e finalize para salvar seu histórico completo.",
   };
 }
 
@@ -199,36 +199,36 @@ function getExerciseInsight(
   const lastLoggedSet = [...state.setsPerformed].reverse().find(isSetLogged);
   const lastWeight = safeNumber(lastLoggedSet?.weight);
 
-  let label = "Proxima acao";
-  let title = `Serie ${Math.max(1, pendingIndex + 1)} pronta para registrar`;
-  let detail = "Preencha reps e carga para transformar execucao em leitura clara.";
+  let label = "Próxima ação";
+  let title = `Série ${Math.max(1, pendingIndex + 1)} pronta para registrar`;
+  let detail = "Preencha reps e carga para transformar execução em leitura clara.";
 
   if (doneSets <= 0) {
-    title = "Comece pela primeira serie";
+    title = "Comece pela primeira série";
     detail =
       exercise.targetWeight > 0
-        ? `Meta do bloco: ${round1(exercise.targetWeight)} kg. Registre a primeira serie com leitura limpa.`
-        : "Comece com reps e carga reais para gerar contexto desde o inicio.";
+        ? `Meta do bloco: ${round1(exercise.targetWeight)} kg. Registre a primeira série com leitura limpa.`
+        : "Comece com reps e carga reais para gerar contexto desde o início.";
   } else if (pendingIndex >= 0) {
-    title = `Ritmo ativo: va para a serie ${pendingIndex + 1}`;
+    title = `Ritmo ativo: vá para a série ${pendingIndex + 1}`;
     detail =
       lastWeight > 0 && exercise.targetWeight > 0
         ? `Ultima carga registrada: ${round1(lastWeight)} kg. Meta atual: ${round1(exercise.targetWeight)} kg.`
         : lastWeight > 0
-          ? `Ultima carga registrada: ${round1(lastWeight)} kg. Use isso como referencia para a proxima serie.`
-          : "Mantenha a sequencia do exercicio para nao perder o ritmo da sessao.";
+        ? `Última carga registrada: ${round1(lastWeight)} kg. Use isso como referência para a próxima série.`
+          : "Mantenha a sequência do exercício para não perder o ritmo da sessão.";
   } else {
-    label = "Exercicio concluido";
+    label = "Exercício concluído";
     title = "Bloco fechado com leitura registrada";
     detail =
       lastWeight > 0
-        ? `Ultima carga registrada: ${round1(lastWeight)} kg. Siga para o proximo exercicio com esse contexto salvo.`
-        : "Todas as series foram registradas. Voce ja pode seguir para o proximo bloco.";
+        ? `Última carga registrada: ${round1(lastWeight)} kg. Siga para o próximo exercício com esse contexto salvo.`
+        : "Todas as séries foram registradas. Você já pode seguir para o próximo bloco.";
   }
 
   const support = exercise.technique
-    ? `Foco tecnico: ${exercise.technique}.`
-    : "Use os controles rapidos para ajustar reps e carga sem quebrar o ritmo.";
+    ? `Foco técnico: ${exercise.technique}.`
+    : "Use os controles rápidos para ajustar reps e carga sem quebrar o ritmo.";
 
   return { label, title, detail, support, pendingIndex, doneSets };
 }
@@ -545,7 +545,7 @@ export default function ActiveWorkoutPage() {
           ? String((error as { message?: unknown }).message ?? "")
           : "";
 
-      alert(message || "Nao foi possivel finalizar o treino. Veja o console.");
+      alert(message || "Não foi possível finalizar o treino. Veja o console.");
       finishingRef.current = false;
     } finally {
       setSaving(false);

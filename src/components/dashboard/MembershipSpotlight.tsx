@@ -17,7 +17,7 @@ export function MembershipSpotlight() {
     subscriptionStatus === "active"
       ? "Premium ativo"
       : subscriptionStatus === "trialing"
-      ? "Periodo de teste"
+      ? "Período de teste"
       : hasPremiumAccess
       ? "Acesso premium"
       : "Plano free";
@@ -29,7 +29,7 @@ export function MembershipSpotlight() {
       ? "Liberado pelo admin"
       : planSource === "founder"
       ? "Conta founder"
-      : "Camada padrao do produto";
+      : "Camada padrão do produto";
 
   return (
     <section
@@ -45,14 +45,14 @@ export function MembershipSpotlight() {
 
         <h3 className="membership-spotlight-title">
           {hasPremiumAccess
-            ? "Sua conta ja esta na camada premium."
+            ? "Sua conta já está na camada premium."
             : "Seu dashboard free sustenta a rotina. O premium entra para transformar isso em leitura."}
         </h3>
 
         <p className="membership-spotlight-subtitle">
           {hasPremiumAccess
-            ? "IA, leitura avancada e camada de assinatura ja estao conectadas ao seu acesso. Agora o foco e usar isso no fluxo do produto."
-            : "Voce ja tem rotina, historico e controle operacional. O premium adiciona score, comparacoes, insight e uma camada de IA que deixa o progresso muito mais visivel."}
+            ? "IA, leitura avançada e camada de assinatura já estão conectadas ao seu acesso. Agora o foco é usar isso no fluxo do produto."
+            : "Você já tem rotina, histórico e controle operacional. O premium adiciona score, comparações, insight e uma camada de IA que deixa o progresso muito mais visível."}
         </p>
 
         <div className="membership-spotlight-meta">
